@@ -1,0 +1,119 @@
+# Introduction
+
+Il existe un large éventail de package R consacré à la gestion et la mise en forme de table et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de grandes qualités, leur coût d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
+
+Pour répondre aux besoins de ces derniers, vous trouverez ici une fonction qui permet de facilement compiler des tris à plats ou bivariées, pour explorer automatiquement un grand nombre de variables, utiliser une pondération et les exporter dans un document Excel.
+
+Pour une introduction aux tables et à la pondération, voir la [fiche](https://mthevenin.github.io/assistoolsms/R/assist/posts/weight_norm/weight_norm.html)
+
+## Données d'exemples
+
+Pour illustrer la mise en oeuvre de la fonction, on utilise les données d'exemples *hdv2003* du packages `questionr`. Ces données possèdent à la fois des variables sur des carastéristiques socio-démographiques, des pratiques et des goûts, et propose une variable de pondération : *poids*.
+
+```{r filename="Import des données d'exemples", warning=FALSE, message=FALSE}
+
+library(questionr)
+data("hdv2003")
+
+```
+
+
+## Objectifs :
+
+-   Obtenir une table automatique avec les tris à plat d'un grand nombre de variables
+-   Croiser ces variables avec une variable choisie, par exemple le sexe ou la qualification et obtenir :
+    -   Les effectifs
+    -   Les pourcentages lignes
+    -   Les poucentages colonnes
+    -   Ajout d'un test du chi²
+-   Utiliser des pondérations
+-   Garder ou non les valeurs manquantes
+-   Exporter le tableau obtenu (Par exemple : image ci-dessous)
+
+
+# Mise en oeuvre
+ 
+## Fonctionnement
+
+On utilise la fonction `table_auto()` qui ne fait partie d'aucun package, il faut donc la charger dans un premier temps dans R. Une fois la fonction chargée, il suffira de la lancer en renseignant les variables, et les options voulues (présence de valeurs manquantes, pondérations, exportation)
+
+## Paramètre de la fonction
+
+**donnees**    : Une base de données                            
+**vars**       : Un vecteur avec les différentes variables en lignes          
+**var_crois**  :    
+- Si vide : Tris à plat                                    
+- Si une variable : Tris croisés
+
+**table_type**  :  
+-   Effectifs           : "eff"      
+-   Pourcentage ligne   : "pct_ligne"  
+-   Pourcentage colonne : "pct_col"
+                  
+**ponder**      : Une variable de pondération dans donnee                      
+**val.manq**    : "oui" ou "non", garder ou non les valeurs manquantes         
+**arrondi**     : Nombre de chiffre après la virgule                           
+**sautdeligne** : "oui" ou "non", insérer une ligne vide entre chaque variable     
+
+**export_XLS**  : "oui" ou "non", si oui : création d'un fichier excel.        
+
+
+
+## Import de la fonction `table_auto()`
+
+Pour l'instant la fonction ne se trouve pas dans un package, il faut donc la charger dans l'environnement global de R depuis GitHub en utilisant le code suivant.  
+
+
+```{r filename="Import de la fonction depuis Github"}
+
+source("https://raw.githubusercontent.com/arnomuller/table_auto/main/fonction_table_auto.R")
+
+```
+
+
+## Choix des variables
+
+On définit les variables à croiser :
+
+```{r filename="Choix des variables"}
+
+vars      <- c("relig","trav.imp","trav.satisf","hard.rock",
+               "lecture.bd","peche.chasse","cuisine",
+               "bricol","cinema","sport")
+
+```
+
+On peut également définir ici la variable de poids et celle à croiser, ou le faire directement dans la fonction.
+
+```{r}
+# On croise avec la variable sexe
+var_crois <- "sexe"
+# Si pas de croisement écrire NULL
+var_crois <- NULL
+
+# Variable de pondération
+ponder    <- "poids"
+# Si pas de pondération :
+ponder    <- NULL
+
+```
+
+
+## Création du tableau empilé
+
+En lançant le code suivant, on crée le data.frame **tabdesc**.
+
+```{r filename="Activation de la fonction", warning=FALSE, message=FALSE}
+
+table_auto(hdv2003,              # Base de données
+           vars,                 # Un vecteur avec les noms des variables
+           var_crois   = "sexe", # Variable à croiser, si NULL : tri à plat
+           table_type  = "eff",  # Type de table : "eff", "pct_lign", "pct_col"
+           ponder      = NULL,   # Variable de ponder. , si NULL: pas de poids
+           val.manq    = "non",  # Si "oui" avec valeurs manquantes
+           arrondi     = 4,      # Nb de chiffres après la virgule
+           sautdeligne = "oui",  # Sauter des lignes entre les variables
+           export_XLS  = "non")  # Si "oui" créer un excel : tableau_empilee
+
+
+```
