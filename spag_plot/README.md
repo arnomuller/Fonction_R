@@ -43,7 +43,8 @@ Une fois la fonction chargée, il suffira de la lancer dans R en renseignant les
 **ordre**      : Ordre des graphiques    
 - Soit "alpha" : Ordre alphabétique selon var_group                                
 - Soit une valeur numérique comprise dans var_x : Classe à la date de var_x
-- Soit un vecteur avec les noms des groupes dans l'ordre voulu : Ordre du vecteur  
+- Soit un vecteur avec les noms des groupes dans l'ordre voulu : Ordre du vecteur
+
 **decroiss**   : "oui" ou "non", Ordre décroissant ou croissant de ordre   
 **titre**      : Choix du titre du graphique    
 **titre_x**    : Choix du titre de l'axe X    
