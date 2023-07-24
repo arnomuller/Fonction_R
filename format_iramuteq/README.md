@@ -47,11 +47,11 @@ On utilise la fonction `format_iramuteq()` qui ne fait partie d'aucun package, i
 Une fois la fonction chargée, il suffira de la lancer dans R en renseignant les variables, et les options voulues.
 
 
-## Import de la fonction `table_auto()`
+## Import de la fonction ` format_iramuteq ()`
 
 Pour l'instant la fonction ne se trouve pas dans un package, il faut donc la charger dans l'environnement global de R depuis GitHub en utilisant le code suivant.  
 
-```{r filename="Import de la fonction depuis Github"}
+```{r}
 
 source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/format_iramuteq/format_iramuteq.R")
 
@@ -73,7 +73,6 @@ source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/format_iram
 
 ```{r}
 
-vars_metadonnees <- c("CJournal", "Annee", "Journal_2")
 format_iramuteq(dataframe = donnees, 
                 nom_fichier = "corpus_iramuteq.txt", 
 				var_texte = "Texte", 
@@ -95,7 +94,7 @@ Le format utilisé dans Iramuteq se présentent sous le format :
 
 **Texte 2**
 
-Chaque texte est séparé du précédent par une ligne étoilé qui contient les métadonnées, qui sont elles même séparées par une étoile.
+Chaque texte est séparé du précédent par une ligne étoilé qui contient les métadonnées, qui sont, elles même, séparées par une étoile.
 Iramuteq impose donc quelques limitations dans les noms de variables (métadonnées) et les valeurs qu'elles peuvent prendre, ainsi que pour certains symboles dans les textes.
 
 
@@ -105,6 +104,3 @@ Iramuteq impose donc quelques limitations dans les noms de variables (métadonn�
 3) Il faut supprimer les \* présentent dans les textes.
 
 Chacun de ces 3 points sont pris en compte dans la fonction `format_iramuteq()` mais informera l'utilisateur.rice des modifications par un **warning**.
-
-
-
