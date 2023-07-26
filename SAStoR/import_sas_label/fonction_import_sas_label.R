@@ -17,8 +17,7 @@ import_sas_label <- function(data_file, catalog_file){
   # Charger les packages
   lapply(packages, require, character.only = TRUE)
   
-  
-  
+
   
   ### Import des données ----
   
@@ -29,38 +28,36 @@ import_sas_label <- function(data_file, catalog_file){
     lapply(as.list(read_sas(data_file,
                             catalog_file = catalog_file)), 
            function(col) {
-             # Pour toutes les variables qui ont un label $
-             # qui ont autant de label que de valeurs possibles
-             if (any(class(col) == "haven_labelled") & 
-                 length(unique(col)) == length(attributes(col)$labels)) {
-               
-               # On transforme en factor
-               return(as_factor(col))
+             # Pour toutes les variables qui ont un label et
+             # qui ont quasiment autant de label que de valeurs possibles
+             if (any(class(col) == "haven_labelled")){
                
                
                # ATTENTION : les NA sont recodés en "", il ne faut donc pas le 
                # compter parmis les modalités de la variable
-             } else if(length(unique(col)) == length(attributes(col)$labels)+1){
+               # De même les NSP sont souvent 99 ou 88 etc.
                
-               #Ne s'applique qu'au variable character
-               if(any(class(col) == "character")){
-                 if(any(unique(col) == "")){
-                   # Si effectivement on a le bon nombre de modalités et de 
-                   # labels alors on transforme en factor
-                   return(as_factor(col))
-                 } else {
-                   # Sinon on touche pas
-                   return(col)
-                 }
+               # Je choisis de faire la différence entre le nb de modalité
+               # et le nombre de label < 5 pour ces cas là.
+               # A réflechir
+               
+               if (length(unique(col)) - length(attributes(col)$labels) < 5){
+                 # On transforme en factor
+                 return(as_factor(col))
+
+                 
                } else {
+                 
                  # Sinon on touche pas
                  return(col)
-               }
-               
-             } else {
+               } 
+             }else {
                # Sinon on touche pas
                return(col)
+               
              }
+             
+         
            }))
   
   
