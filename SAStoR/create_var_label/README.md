@@ -25,13 +25,13 @@ Si les NSP sont recodés en 99 ou 999, ils seront ajoutés à la dernière caté
 **varlabel**   : Une variable continue avec un label qui s'applique sur des intervalles   
 
 
-## Import de la fonction `table_auto()`
+## Import de la fonction `create_var_label()`
 
 Pour l'instant la fonction ne se trouve pas dans un package, il faut donc la charger dans l'environnement global de R depuis GitHub en utilisant le code suivant.  
 
 ```{r filename="Import de la fonction depuis Github"}
 
-source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/SAStoR/create_var_label/create_var_label.R")
+source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/SAStoR/create_var_label/fonction_create_var_label.R")
 
 ```
 
