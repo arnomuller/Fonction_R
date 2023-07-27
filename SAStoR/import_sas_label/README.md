@@ -21,7 +21,8 @@ Cependant la fonction `create_var_label()`  permet de régler ce problème. (voi
 ## Paramètre de la fonction
 
 **data_file**    : Chemin d'accès vers une base de données au format .sas7bdat.                          
-**catalog_file** : Chemin d'accès vers un catalogue de labels au format .sas7bcat.       
+**catalog_file** : Chemin d'accès vers un catalogue de labels au format .sas7bcat.      
+**blanc_as_NA**  : TRUE ou FALSE, permet de transformer les blancs ("") en NA. 
 
 
 ## Import de la fonction `import_sas_label()`
@@ -46,7 +47,8 @@ L'exemple ci-joint est basé sur une extraction de la 1ère enquête ERFI
 ```{r }
 
 erfi <- import_sas_label(data_file = "erfi_extrait2.sas7bdat", 
-                         catalog_file = "formats.sas7bcat")
+                         catalog_file = "formats.sas7bcat",
+						 blanc_as_NA = TRUE)
 table(erfi$MB_STOC)
 table(erfi$MA_AGER)
 
@@ -57,5 +59,6 @@ table(erfi$MA_AGER)
 
 ## Pour plus tard
 
-- Gestion des NA : pour l'instant je les laisse en "", mais je pourrai les remplacer.
+- Potentiel problème quand un label est utilisé pour recoder une variable et qu'il regroupe 2 modalités sous la même étiquette.
+	- Piste : changer la manière de détecter les labels qui s'appliquer sur plusieurs modalités (par intervalle), mais ouvre le problème de détection des 99 et des 88 etc.
 
