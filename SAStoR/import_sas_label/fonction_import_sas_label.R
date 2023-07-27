@@ -1,9 +1,11 @@
-import_sas_label <- function(data_file, catalog_file){
+import_sas_label <- function(data_file, 
+                             catalog_file,
+                             blanc_as_NA = TRUE){
   
   ### GESTION LIBRARY ----
   
   # Liste des packages à charger
-  packages <- c("haven")
+  packages <- c("haven","dplyr")
   
   # Vérifier si les packages sont déjà installés
   missing_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
@@ -17,12 +19,12 @@ import_sas_label <- function(data_file, catalog_file){
   # Charger les packages
   lapply(packages, require, character.only = TRUE)
   
-
+  
   
   ### Import des données ----
   
   # Je crée un data.frame
-  as.data.frame(
+  dt <- as.data.frame(
     # Je vais appliquer une fonction à toutes les colonnes de la liste issue
     # du read_sas avec le catalog.
     lapply(as.list(read_sas(data_file,
@@ -44,7 +46,7 @@ import_sas_label <- function(data_file, catalog_file){
                if (length(unique(col)) - length(attributes(col)$labels) < 5){
                  # On transforme en factor
                  return(as_factor(col))
-
+                 
                  
                } else {
                  
@@ -57,8 +59,17 @@ import_sas_label <- function(data_file, catalog_file){
                
              }
              
-         
+             
            }))
   
-  
+  # Gestion des NA, pour les laisser en "" ou en NA
+  if( isTRUE(blanc_as_NA)) {
+    # On transforme les facteurs en NA
+    dt <- dt %>% 
+      mutate_if(is.factor, ~ifelse(. == "", NA, .))
+    dt
+  } else {
+    # On touche pas.
+    dt
+  }
 }
