@@ -173,8 +173,29 @@ table_auto <- function(donnees,
                               xtabs(ponder_calc~ 
                                       get(colnames(dt[vars[i]]))+
                                       get(var_crois),
-                                    data=dt))$parameter[[1]])       %>% 
+                                    data=dt))$parameter[[1]])       %>%
+                            mutate(danger = 0) %>% 
                             select(Var,Levels, everything()))
+        
+        
+        result <- tryCatch({
+          chisq.test(
+            xtabs(ponder_calc~ 
+                    get(colnames(dt[vars[i]]))+
+                    get(var_crois),
+                  data=dt))
+        }, warning = function(warn) {
+          warn_message <- conditionMessage(warn)
+          return(warn_message)
+        })
+        
+        # Est-ce qu'il y a un warning dans chisq.test
+        if (inherits(result, "character")) {
+          desc_grp <- desc_grp %>% 
+            mutate(danger = if_else(Var == vars[i], 1, danger))
+          
+        } 
+        
         
         # Ajout de ligne blanche entre les variables
         if(sautdeligne == "oui"){
@@ -185,14 +206,14 @@ table_auto <- function(donnees,
     
     
     
-    ## Création base finale propre pour trier croisé
+    ## Création base finale propre pour tris croisés
     if(var_crois_OK == "OUI"){
       
       desc_grp <- desc_grp %>% 
         bind_cols(select(desc_T, "ENSEMBLE")) 
       
       tabdesc = as.data.frame(t(
-        c("", "ENSEMBLE", with(dt, round(wtd.table(get(var_crois), weights = ponder_calc, useNA=NA_oupas),arrondi)),NA, NA,sum(ponder_calc))))  %>%
+        c("", "ENSEMBLE", with(dt, round(wtd.table(get(var_crois), weights = ponder_calc, useNA=NA_oupas),arrondi)),NA, NA, NA,sum(ponder_calc))))  %>%
         `colnames<-`(colnames(desc_grp))
       
       if(sautdeligne == "oui"){
@@ -226,6 +247,11 @@ table_auto <- function(donnees,
     }
     
   }
+  
+  
+  
+  
+  
   
   if(table_type %in% c("pct_ligne","pct_col")){
     
@@ -283,8 +309,28 @@ table_auto <- function(donnees,
                               xtabs(ponder_calc~ 
                                       get(colnames(dt[vars[i]]))+
                                       get(var_crois),
-                                    data=dt))$parameter[[1]])       %>% 
+                                    data=dt))$parameter[[1]]) %>%
+                            mutate(danger = 0) %>%     
                             select(Var,Levels, everything()))
+        
+        
+        result <- tryCatch({
+          chisq.test(
+            xtabs(ponder_calc~ 
+                    get(colnames(dt[vars[i]]))+
+                    get(var_crois),
+                  data=dt))
+        }, warning = function(warn) {
+          warn_message <- conditionMessage(warn)
+          return(warn_message)
+        })
+        
+        # Est-ce qu'il y a un warning dans chisq.test
+        if (inherits(result, "character")) {
+          desc_grp <- desc_grp %>% 
+            mutate(danger = if_else(Var == vars[i], 1, danger))
+          
+        } 
         
         # Ajout de ligne blanche entre les variables
         if(sautdeligne == "oui"){
@@ -306,7 +352,7 @@ table_auto <- function(donnees,
         
         tabdesc = as.data.frame(t(
           c("", "ENSEMBLE", round(prop.table(with(dt, wtd.table(get(var_crois), weights = ponder_calc, useNA=NA_oupas)))*100,arrondi),
-            NA,NA,100)))  %>%
+            NA,NA,NA,100)))  %>%
           `colnames<-`(colnames(desc_grp))
         
         if(sautdeligne == "oui"){
@@ -329,7 +375,7 @@ table_auto <- function(donnees,
         
         tabdesc = as.data.frame(t(
           c("", "ENSEMBLE", rep(100,length(with(dt,names(table(get(var_crois), useNA = NA_oupas))))),
-            NA,NA,100)))  %>%
+            NA,NA,NA,100)))  %>%
           `colnames<-`(colnames(desc_grp))
         
         if(sautdeligne == "oui"){
