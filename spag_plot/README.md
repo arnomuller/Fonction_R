@@ -36,22 +36,23 @@ Une fois la fonction chargée, il suffira de la lancer dans R en renseignant les
 
 ## Paramètre de la fonction
 
-**donnees**    : Une base de données                             
-**var_x**      : Une variable continue pour l'axe X    
-**var_y**      : Une variable continue pour l'axe Y   
-**var_group**  : Une variable catégorielle         
-**ordre**      : Ordre des graphiques    
+**donnees**     : Une base de données                             
+**var_x**       : Une variable continue pour l'axe X    
+**var_y**       : Une variable continue pour l'axe Y   
+**var_group**   : Une variable catégorielle         
+**ordre**       : Ordre des graphiques    
 - Soit "alpha" : Ordre alphabétique selon var_group                                
 - Soit une valeur numérique comprise dans var_x : Classe à la date de var_x
 - Soit un vecteur avec les noms des groupes dans l'ordre voulu : Ordre du vecteur
 
-**decroiss**   : "oui" ou "non", Ordre décroissant ou croissant de ordre   
-**titre**      : Choix du titre du graphique    
-**titre_x**    : Choix du titre de l'axe X    
-**titre_y**    : Choix du titre de l'axe Y   
-**source**     : Nom de la source   
-**interval**   : Echelle de l'axe X  
-**n_col**      : Nombre de colonnes sur lesquelles apparaissent les graphiques   
+**decroiss**    : "oui" ou "non", Ordre décroissant ou croissant de ordre   
+**titre**       : Choix du titre du graphique    
+**titre_x**     : Choix du titre de l'axe X    
+**titre_y**     : Choix du titre de l'axe Y   
+**source**      : Nom de la source   
+**interval**    : Echelle de l'axe X  
+**n_col**       : Nombre de colonnes sur lesquelles apparaissent les graphiques   
+**alignement_x**: Position des étiquettes sur l'axe X (à documenter, voir n.dodge) 
 
 
 
@@ -82,5 +83,6 @@ spag_plot(donnees,             # Base de données au format long
           titre_y   ="Taux",   # Choix du titre de l'axe Y
           source    = "",      # Source des données
           interval = 20,       # Echelle de X
-          n_col = 2)           # Nombre de colonnes pour les graphiques
+          n_col = 2,           # Nombre de colonnes pour les graphiques
+		  alignement_x = 1)    # Position sur l'axe X
 ```
