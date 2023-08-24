@@ -5,7 +5,7 @@
 
 
 ## On appelle la fonction depuis github
-source("https://raw.githubusercontent.com/arnomuller/table_auto/main/fonction_table_auto.R")
+source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/table_auto/fonction_table_auto.R")
 
 
 ## Import données

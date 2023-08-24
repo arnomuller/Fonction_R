@@ -66,7 +66,7 @@ Pour l'instant la fonction ne se trouve pas dans un package, il faut donc la cha
 
 ```{r filename="Import de la fonction depuis Github"}
 
-source("https://raw.githubusercontent.com/arnomuller/table_auto/main/fonction_table_auto.R")
+source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/table_auto/fonction_table_auto.R")
 
 ```
 
