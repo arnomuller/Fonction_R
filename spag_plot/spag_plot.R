@@ -9,7 +9,8 @@ spag_plot <- function(donnees,
                       titre_y   ="", 
                       source    = "",
                       interval = 10,
-                      n_col = 4L){
+                      n_col = 4L,
+                      alignement_x = 1){
   
   
   
@@ -121,7 +122,7 @@ spag_plot <- function(donnees,
          y = titre_y, 
          title = titre, 
          caption = source) +
-    scale_x_continuous(guide = guide_axis(n.dodge = 2), breaks = seq(min_x, 
+    scale_x_continuous(guide = guide_axis(n.dodge = alignement_x), breaks = seq(min_x, 
                                                                      max_x, 
                                                                      interval)) + 
     facet_wrap(vars(grp), ncol = n_col)
