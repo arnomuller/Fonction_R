@@ -13,14 +13,17 @@ spag_plot(donnees,             # Base de données au format long
           var_x = "Année",     # Variable en X (numérique)
           var_y = "Indicateur",# Variable en Y (numérique)
           var_group= "Pays",   # Variable de groupe (factor)
-          ordre =  2020,       # Ordre des plots ("alpha", valeur num de var_x, un vecteur)
+          ordre =  "alpha",    # Ordre des plots ("alpha", valeur num de var_x, un vecteur)
           decroiss = "oui",    # Ordre décroissant de l'ordre choisi au dessus
           titre   = "TITRE",   # Choix du titre
           titre_x = "Années",  # Choix du titre de l'axe X
           titre_y   ="Taux",   # Choix du titre de l'axe Y
           source    = "",      # Source des données
-          interval = 20,       # Echelle de X
-          n_col = 2)           # Nombre de colonnes pour les graphiques
+          interval = 1,        # Echelle de X
+          n_col = 2,           # Nombre de colonnes pour les graphiques
+          alignement_x = 5 )   # Nombre d'étiquettes à superposer avant de revenir sur l'axe.
+
+
 
 
 
