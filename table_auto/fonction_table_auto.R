@@ -130,7 +130,7 @@ table_auto <- function(donnees,
       
       ### Création du tri à plat
       desc_T <- rbind(desc_T,
-                      as.data.frame(wtd.table(dt[,vars[i]], 
+                      as.data.frame(wtd.table(unlist(dt[,vars[i]]), 
                                               weights = ponder_calc, 
                                               useNA=NA_oupas)) %>% 
                         rename(Levels = Var1,
@@ -150,7 +150,7 @@ table_auto <- function(donnees,
       if(var_crois_OK == "OUI"){
         
         
-        tab <- wtd.table(dt[,vars[i]], 
+        tab <- wtd.table(unlist(dt[,vars[i]]), 
                          with(dt,get(var_crois)),
                          weights = ponder_calc, 
                          useNA=NA_oupas)
@@ -265,7 +265,7 @@ table_auto <- function(donnees,
       ### Création du tri à plat
       desc_T <- rbind(desc_T,             
                       as.data.frame(prop.table(
-                        wtd.table(dt[,vars[i]],  
+                        wtd.table(unlist(dt[,vars[i]]),  
                                   weights = ponder_calc, 
                                   useNA=NA_oupas))*100) %>% 
                         rename(Levels = Var1,
@@ -286,7 +286,7 @@ table_auto <- function(donnees,
       if(var_crois_OK == "OUI"){
         
         
-        tab <- prop.table(wtd.table(dt[,vars[i]], 
+        tab <- prop.table(wtd.table(unlist(dt[,vars[i]]), 
                                     with(dt,get(var_crois)),
                                     weights = ponder_calc, 
                                     useNA=NA_oupas),pct_type)*100
