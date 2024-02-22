@@ -24,7 +24,7 @@ Pour l'instant la fonction ne se trouve pas dans un package, il faut donc la cha
 
 ```{r}
 
-source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/europresse/fonction_europresse.R")
+source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/europresse/Fonction_europresse.R")
 
 ```
 

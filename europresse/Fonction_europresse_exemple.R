@@ -5,7 +5,7 @@
 
 
 ## On appelle la fonction depuis github
-source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/europresse/fonction_europresse.R")
+source("https://raw.githubusercontent.com/arnomuller/Fonction_R/main/europresse/Fonction_europresse.R")
 
 
 # Exemple de fonctionnement
