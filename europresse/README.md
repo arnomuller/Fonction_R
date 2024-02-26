@@ -6,8 +6,10 @@ Variables récupérées :
 - Journal  
 - Titre  
 - Date  
+- Année  
 - Auteur  
 - Texte  
+- Longueur  
 
 
 # Mise en oeuvre

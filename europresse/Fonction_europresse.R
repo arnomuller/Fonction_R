@@ -181,7 +181,8 @@ europresse <- function(html,
     # Je trie dans l'ordre croissant de parution
     arrange(Date) %>% 
     mutate(Annee = as.numeric(format(Date, "%Y"))) %>% 
-    select(Annee, Date, Journal, Auteur, Titre, Texte)
+    mutate(Longueur = nchar(Texte) ) %>% 
+    select(Annee, Date, Journal, Auteur, Titre, Texte, Longueur)
   
   
   
