@@ -49,7 +49,8 @@ Une fois la fonction chargée, il suffira de la lancer dans R en renseignant les
 **titre_x**        : Choix du titre de l'axe X    
 **titre_y**        : Choix du titre de l'axe Y   
 **source**         : Nom de la source    
-**interval**       : Echelle de l'axe X   
+**interval_x**     : Echelle de l'axe X   
+**graduation_y**   : Montrer les graduations sur l'axe Y : TRUE/FALSE   
 **n_col**          : Nombre de colonnes sur lesquelles apparaissent les graphiques    
 **alignement_x**   : Position des étiquettes sur l'axe X (à documenter, voir n.dodge)   
 - Une valeur supérieur ou égale à 1 : Nombre d'étiquettes à superposer avant de revenir sur l'axe.   
@@ -92,7 +93,8 @@ spag_plot(donnees,                # Base de données au format long
           titre_x = "Années",     # Choix du titre de l'axe X
           titre_y   ="Taux",      # Choix du titre de l'axe Y
           source    = "",         # Source des données
-          interval = 5,           # Echelle de X
+          interval_x = 5,         # Echelle de X
+          graduation_y = FALSE,   # Graduation sur l'axe Y : TRUE/FALSE 
           n_col = 2,              # Nombre de colonnes pour les graphiques
           alignement_x = 1,       # Nombre d'étiquettes à superposer avant de revenir sur l'axe.
           col_line = "#C24168",   # Couleur de la ligne principale
@@ -102,5 +104,6 @@ spag_plot(donnees,                # Base de données au format long
           col_line_bg = "grey",   # Couleur lignes secondaires
           lwd_line_bg = 0.5,      # Epaisseur lignes secondaires
           transp_line_bg = 0.8,   # Transparence lignes secondaires
-          type_line_bg = "dashed")# Type lignes secondaires  
+          type_line_bg = "dashed")# Type lignes secondaires   
+
 ```

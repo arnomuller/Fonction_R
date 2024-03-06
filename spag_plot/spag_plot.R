@@ -8,7 +8,8 @@ spag_plot <- function(donnees,
                       titre_x  = "",
                       titre_y   ="", 
                       source    = "",
-                      interval = 10,
+                      interval_x = 10,
+                      graduation_y = FALSE,
                       n_col = 4L,
                       alignement_x = 1,
                       col_line = "#C24168",
@@ -120,7 +121,7 @@ spag_plot <- function(donnees,
   
   ### REALISATION DU GRAPHIQUE ----
   
-  ggplot(dt) +
+  p <- ggplot(dt) +
     aes(x = var_x, y = var_y) +
     geom_line(data = dt %>% dplyr::select(-grp), aes(group = grp2), 
               color = col_line_bg, 
@@ -136,13 +137,19 @@ spag_plot <- function(donnees,
          caption = source) +
     scale_x_continuous(guide = guide_axis(n.dodge = alignement_x), breaks = seq(min_x, 
                                                                      max_x, 
-                                                                     interval)) + 
-    facet_wrap(vars(grp), ncol = n_col) +
-    theme(
+                                                                     interval_x)) + 
+    facet_wrap(vars(grp), ncol = n_col)
+    
+  
+  if(graduation_y == TRUE){
+    p
+  } else{
+    p + theme(
       axis.ticks.y = element_blank(),
       panel.grid.major.y = element_blank(), 
       panel.grid.minor.y = element_blank()
     )  
+  }
   
   
 }
