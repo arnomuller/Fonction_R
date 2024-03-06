@@ -10,7 +10,15 @@ spag_plot <- function(donnees,
                       source    = "",
                       interval = 10,
                       n_col = 4L,
-                      alignement_x = 1){
+                      alignement_x = 1,
+                      col_line = "#C24168",
+                      lwd_line = 1.4,
+                      transp_line = 1,
+                      type_line = "solid",
+                      col_line_bg = "lightgrey",
+                      lwd_line_bg = 0.5,
+                      transp_line_bg = 0.8,
+                      type_line_bg = "solid"){
   
   
   
@@ -114,8 +122,12 @@ spag_plot <- function(donnees,
   
   ggplot(dt) +
     aes(x = var_x, y = var_y) +
-    geom_line(data = dt %>% dplyr::select(-grp), aes(group = grp2), color = "grey", lwd = 0.5) +    
-    geom_line(colour = "#C24168", lwd = 1.4) +
+    geom_line(data = dt %>% dplyr::select(-grp), aes(group = grp2), 
+              color = col_line_bg, 
+              lwd = lwd_line_bg, 
+              alpha = transp_line_bg,
+              linetype = type_line_bg) +    
+    geom_line(colour = col_line, lwd = lwd_line, alpha = transp_line, linetype = type_line) +
     labs(title = titre_y) +
     theme_minimal() +
     labs(x = titre_x, 
@@ -125,7 +137,12 @@ spag_plot <- function(donnees,
     scale_x_continuous(guide = guide_axis(n.dodge = alignement_x), breaks = seq(min_x, 
                                                                      max_x, 
                                                                      interval)) + 
-    facet_wrap(vars(grp), ncol = n_col)
+    facet_wrap(vars(grp), ncol = n_col) +
+    theme(
+      axis.ticks.y = element_blank(),
+      panel.grid.major.y = element_blank(), 
+      panel.grid.minor.y = element_blank()
+    )  
   
   
 }
