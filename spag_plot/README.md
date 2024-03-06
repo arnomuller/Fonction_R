@@ -30,7 +30,7 @@ donnees <- data.frame(
  
 ## Fonctionnement
 
-On utilise la fonction `table_auto()` qui ne fait partie d'aucun package, il faut donc la charger dans un premier temps dans R. 
+On utilise la fonction `spag_plot()` qui ne fait partie d'aucun package, il faut donc la charger dans un premier temps dans R. 
 Une fois la fonction chargée, il suffira de la lancer dans R en renseignant les variables, et les options voulues.
 
 ## Paramètre de la fonction
