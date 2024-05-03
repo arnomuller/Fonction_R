@@ -23,7 +23,7 @@ Cependant la fonction `create_var_label()`  permet de régler ce problème. (voi
 **data_file**       : Chemin d'accès vers une base de données au format .sas7bdat.                          
 **catalog_file**    : Chemin d'accès vers un catalogue de labels au format .sas7bcat.      
 **blanc_as_NA**     : TRUE ou FALSE, permet de transformer les blancs ("") en NA.  
-**label_manquant**  : Une valeur numérique qui permet de recoder les modalités même si un certains nombre de labels sont manquants (par exemple pour les valeurs manquantes qui ont souvent 99 comme modalités, sans labels textuel associé)  
+**label_manquant**  : Une valeur numérique qui permet de recoder les modalités même si un certain nombre de labels sont manquants (par exemple pour les valeurs manquantes qui ont souvent 99 comme modalités, sans label textuel associé)  
 
 
 ## Import de la fonction `import_sas_label()`
