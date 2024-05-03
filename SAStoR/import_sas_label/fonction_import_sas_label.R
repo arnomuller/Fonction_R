@@ -1,5 +1,6 @@
 import_sas_label <- function(data_file, 
                              catalog_file,
+                             label_manquant = 5,
                              blanc_as_NA = TRUE){
   
   ### GESTION LIBRARY ----
@@ -43,7 +44,7 @@ import_sas_label <- function(data_file,
                # et le nombre de label < 5 pour ces cas là.
                # A réflechir
                
-               if (length(unique(col)) - length(attributes(col)$labels) < 5){
+               if (length(unique(col)) - length(attributes(col)$labels) < label_manquant){
                  # On transforme en factor
                  return(as_factor(col))
                  
@@ -66,7 +67,7 @@ import_sas_label <- function(data_file,
   if( isTRUE(blanc_as_NA)) {
     # On transforme les facteurs en NA
     dt <- dt %>% 
-      mutate_if(is.factor, ~ifelse(. == "", NA, .))
+      mutate_if(is.factor, ~ as.factor(ifelse(as.character(.) == "", NA, as.character(.))))
     dt
   } else {
     # On touche pas.
