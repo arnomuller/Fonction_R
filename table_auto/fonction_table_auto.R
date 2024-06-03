@@ -120,7 +120,7 @@ table_auto <- function(data,
     ### Création du tri à plat
     desc_uni <- rbind(desc_uni,
                       dt %>% 
-                        select(vars[i]) %>% 
+                        select(all_of(vars[i])) %>% 
                         mutate(across(where(is.numeric) |where(is.character) , ~ as.factor(.))) %>% 
                         mutate(ponderation = ponder_calc) %>%
                         group_by(get(vars[i])) %>% 
