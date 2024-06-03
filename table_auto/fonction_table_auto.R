@@ -106,7 +106,7 @@ table_auto <- function(data,
     ponder_calc <- with(dt,get(var_weight))
   }
   
-
+  
   # Création table
   desc_uni <- data.frame()
   desc_bi_eff <- data.frame()
@@ -136,7 +136,7 @@ table_auto <- function(data,
     # Gestion des NA
     if(useNA == FALSE){
       desc_uni <- desc_uni %>% 
-          filter(Levels != "Val.Manq." | is.na(Levels) == TRUE )
+        filter(Levels != "Val.Manq." | is.na(Levels) == TRUE )
     }
     
     # Ajout de ligne blanche entre les variables
@@ -155,18 +155,18 @@ table_auto <- function(data,
         # Sauvegarde la table du chi² et on capture le message d'erreur (s'il y en a)
         
         chi2 <<- chisq.test(xtabs(ponder_calc~
-                           get(colnames(dt[vars[i]]))+
-                           get(var_col),
-                         data=dt,
-                         addNA = useNA))
+                                    get(colnames(dt[vars[i]]))+
+                                    get(var_col),
+                                  data=dt,
+                                  addNA = useNA))
         
         msg_chi2 <- tryCatch({
           
           chisq.test(xtabs(ponder_calc~
-                                      get(colnames(dt[vars[i]]))+
-                                      get(var_col),
-                                    data=dt,
-                                    addNA = useNA))
+                             get(colnames(dt[vars[i]]))+
+                             get(var_col),
+                           data=dt,
+                           addNA = useNA))
           
         }, warning = function(warn) {
           warn_message <<- conditionMessage(warn)
@@ -180,7 +180,7 @@ table_auto <- function(data,
       
       if(table_type %in% c("eff","all")){
         tab_eff <- dt %>% 
-          select(var_col,vars[i]) %>% 
+          select(all_of(var_col),all_of(vars[i])) %>% 
           mutate(across(where(is.numeric) |where(is.character) , ~ as.factor(.))) %>% 
           mutate(ponderation = ponder_calc) %>% 
           group_by(get(var_col),get(vars[i])) %>% 
@@ -238,7 +238,7 @@ table_auto <- function(data,
       
       if(table_type %in% c("row","all")){
         tab_row <- dt %>% 
-          select(var_col,vars[i]) %>% 
+          select(all_of(var_col),all_of(vars[i])) %>%  
           mutate(across(where(is.numeric) |where(is.character) , ~ as.factor(.))) %>%
           mutate(ponderation = ponder_calc) %>% 
           group_by(get(var_col),get(vars[i])) %>% 
@@ -296,7 +296,7 @@ table_auto <- function(data,
       
       if(table_type %in% c("col","all")){
         tab_col <- dt %>% 
-          select(var_col,vars[i]) %>% 
+          select(all_of(var_col),all_of(vars[i])) %>% 
           mutate(across(where(is.numeric) |where(is.character) , ~ as.factor(.))) %>%
           mutate(ponderation = ponder_calc) %>% 
           group_by(get(var_col),get(vars[i])) %>% 
@@ -401,7 +401,7 @@ table_auto <- function(data,
         if(any(is.na(names(with(dt,table(get(var_col),useNA = "ifany")))))){
           first_row <- first_row %>% 
             select(-Val.Manq.)
-      }}
+        }}
       
       if(add_blank_rows == FALSE){
         desc_bi_eff <- first_row %>% bind_rows(desc_bi_eff)  
