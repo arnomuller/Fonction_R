@@ -1,8 +1,8 @@
 # Introduction
 
-Il existe un large éventail de package R consacré à la gestion et la mise en forme de table et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de grandes qualités, leur coût d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
+Il existe un large éventail de package R consacré à la gestion et la mise en forme de table et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de bonne qualités, leur coût d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
 
-Pour répondre aux besoins de ces derniers, vous trouverez ici une fonction qui permet de facilement compiler des tris à plats ou bivariées, pour explorer automatiquement un grand nombre de variables, utiliser une pondération et les exporter dans un document Excel.
+table_auto() se veut une fonction facile d'utilisation permettant de compiler des tris uni- ou bivariées sur un grand nombre de variables, d'utiliser une pondération et les exporter dans un document Excel.
 
 Pour une introduction aux tables et à la pondération, voir la [fiche](https://mthevenin.github.io/assistoolsms/R/assist/posts/weight_norm/weight_norm.html)
 
@@ -28,7 +28,7 @@ data("hdv2003")
     -   Ajout d'un test du chi²
 -   Utiliser des pondérations
 -   Garder ou non les valeurs manquantes
--   Exporter le tableau obtenu (Par exemple : image ci-dessous)
+-   Exporter le tableau obtenu  
 
 
 # Mise en oeuvre
@@ -39,23 +39,40 @@ On utilise la fonction `table_auto()` qui ne fait partie d'aucun package, il fau
 
 ## Paramètre de la fonction
 
-**donnees**    : Une base de données                            
-**vars**       : Un vecteur avec les différentes variables en lignes          
-**var_crois**  :    
-- Si vide : Tris à plat                                    
+**data**          : Une base de données                            
+**vars**          : Un vecteur avec des noms de variables         
+**var_col**       :    
+- Si NULL (vide)  : Tris à plat                                    
 - Si une variable : Tris croisés
 
-**table_type**  :  
+**table_type**     :  
 -   Effectifs           : "eff"      
--   Pourcentage ligne   : "pct_ligne"  
--   Pourcentage colonne : "pct_col"
+-   Pourcentage ligne   : "row"  
+-   Pourcentage colonne : "col"  
+-	Tout                : "all"
                   
-**ponder**      : Une variable de pondération dans donnee                      
-**val.manq**    : "oui" ou "non", garder ou non les valeurs manquantes         
-**arrondi**     : Nombre de chiffre après la virgule                           
-**sautdeligne** : "oui" ou "non", insérer une ligne vide entre chaque variable     
+**var_weight**     : Le nom d'une variable de pondération dans data                     
+**useNA**          : TRUE ou FALSE, garder ou non les valeurs manquantes      
+**chi2.test**      : TRUE ou FALSE, ajouter une p.value du test du chi²        
+**arrondi**        : Nombre de chiffre après la virgule                           
+**add_blank_rows** : TRUE ou FALSE, insérer une ligne vide entre chaque variable     
+**eff_in_name**    : TRUE ou FALSE, ajouter les effectifs dans les noms des modalités   
+**excel_export**   : TRUE ou FALSE, création d'un fichier excel.        
+**excel_filepath** : Chemin et nom du fichier excel (défaut : "table_auto.xlsx")        
 
-**export_XLS**  : "oui" ou "non", si oui : création d'un fichier excel.        
+
+table_auto(hdv2003,                  # Base de données
+           vars,                     # Un vecteur avec les noms des variables d'intérêts
+           var_col        = "sexe",  # Variable à croiser avec celles du vecteur
+           table_type     = "all",   # Type de table : "all", "eff", "row", "col"
+           var_weight     = "poids", # Variable de pondération, sinon = NULL
+           useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
+           chi2.test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
+           arrondi        = 3,       # Nombre de chiffres après la virgule
+           add_blank_rows = TRUE,    # TRUE/FALSE : Ajout d'une ligne vide entre les variables
+           eff_in_name    = TRUE,    # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
+           excel_export   = TRUE,    # TRUE/FALSE : Création d'un fichier excel et son chemin
+           excel_filepath = "./table_auto.xlsx")   
 
 
 
@@ -83,37 +100,25 @@ vars      <- c("relig","trav.imp","trav.satisf","hard.rock",
 
 ```
 
-On peut également définir ici la variable de poids et celle à croiser, ou le faire directement dans la fonction.
-
-```{r}
-# On croise avec la variable sexe
-var_crois <- "sexe"
-# Si pas de croisement écrire NULL
-var_crois <- NULL
-
-# Variable de pondération
-ponder    <- "poids"
-# Si pas de pondération :
-ponder    <- NULL
-
-```
 
 
 ## Création du tableau empilé
 
-En lançant le code suivant, on crée le data.frame **tabdesc**.
+En lançant le code suivant, on crée les data.frames **table_auto_(table_type)**.
 
 ```{r filename="Activation de la fonction", warning=FALSE, message=FALSE}
 
-table_auto(hdv2003,              # Base de données
-           vars,                 # Un vecteur avec les noms des variables
-           var_crois   = "sexe", # Variable à croiser, si NULL : tri à plat
-           table_type  = "eff",  # Type de table : "eff", "pct_lign", "pct_col"
-           ponder      = NULL,   # Variable de ponder. , si NULL: pas de poids
-           val.manq    = "non",  # Si "oui" avec valeurs manquantes
-           arrondi     = 4,      # Nb de chiffres après la virgule
-           sautdeligne = "oui",  # Sauter des lignes entre les variables
-           export_XLS  = "non")  # Si "oui" créer un excel : tableau_empilee
-
+table_auto(hdv2003,                  # Base de données
+           vars,                     # Un vecteur avec les noms des variables d'intérêts
+           var_col        = "sexe",  # Variable à croiser avec celles du vecteur
+           table_type     = "all",   # Type de table : "all", "eff", "row", "col"
+           var_weight     = "poids", # Variable de pondération, sinon = NULL
+           useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
+           chi2.test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
+           arrondi        = 3,       # Nombre de chiffres après la virgule
+           add_blank_rows = TRUE,    # TRUE/FALSE : Ajout d'une ligne vide entre les variables
+           eff_in_name    = TRUE,    # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
+           excel_export   = TRUE,    # TRUE/FALSE : Création d'un fichier excel et son chemin
+           excel_filepath = "./table_auto.xlsx")   
 
 ```

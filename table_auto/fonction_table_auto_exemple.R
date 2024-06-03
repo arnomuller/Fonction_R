@@ -18,25 +18,17 @@ data("hdv2003")
 vars      <- colnames(hdv2003)[10:19]
 vars
 
-# On les croise avec la variable sexe
-var_crois <- "sexe"
-# Si pas de croisement écrire NULL
-var_crois <- NULL
-
-# Variable de pondération
-ponder    <- "poids"
-# Si pas de pondération :
-ponder    <- NULL
-
-
 
 # On lance la fonction
-table_auto(hdv2003,               # Base de données
-           vars,                  # Un vecteur avec les noms des variables d'intérêts
-           var_crois   = "sexe",  # Variable à croiser avec celles du vecteur
-           table_type  = "eff",   # Type de table : "eff", "pct_ligne", "pct_col"
-           ponder      = "poids", # Variable de pondération, sinon = NULL
-           val.manq    = "non",   # Ajout des valeurs manquantes
-           arrondi     = 3,       # Nombre de chiffres après la virgule
-           sautdeligne = "oui",   # Sauté des lignes entre les variables
-           export_XLS  = "oui")   # Création d'un fichier excel : tableau_empilé
+table_auto(hdv2003,                  # Base de données
+           vars,                     # Un vecteur avec les noms des variables d'intérêts
+           var_col        = "sexe",  # Variable à croiser avec celles du vecteur
+           table_type     = "all",   # Type de table : "all", "eff", "row", "col"
+           var_weight     = "poids", # Variable de pondération, sinon = NULL
+           useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
+           chi2.test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
+           arrondi        = 3,       # Nombre de chiffres après la virgule
+           add_blank_rows = TRUE,    # TRUE/FALSE : Ajout d'une ligne vide entre les variables
+           eff_in_name    = TRUE,    # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
+           excel_export   = TRUE,    # TRUE/FALSE : Création d'un fichier excel et son chemin
+           excel_filepath = "./table_auto.xlsx")   
