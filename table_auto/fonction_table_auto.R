@@ -96,15 +96,20 @@ table_auto <- function(data,
   
   ### GESTION DES PARAMETRES ----
   
-  # Données : 
-  dt <- data
   
-  # Variable pondération : 
+  # Variable pondération :
   if(is.null(var_weight) == T){
-    ponder_calc <- rep(1,nrow(dt))
+    ponder_calc <- rep(1,nrow(data))
   }else{
-    ponder_calc <- with(dt,get(var_weight))
+    ponder_calc <- with(data,get(var_weight))
   }
+  
+  # Données :
+  dt <- data %>% 
+    mutate(ponderation = ponder_calc) %>% 
+    select(any_of(c(vars,var_col)),ponderation) %>% 
+    mutate(across(!matches("ponderation"), as.factor))
+
   
   
   # Création table
@@ -116,13 +121,10 @@ table_auto <- function(data,
   
   
   for (i in c(1:length(vars))) {
-    
+
     ### Création du tri à plat
     desc_uni <- rbind(desc_uni,
                       dt %>% 
-                        select(all_of(vars[i])) %>% 
-                        mutate(across(where(is.numeric) |where(is.character) , ~ as.factor(.))) %>% 
-                        mutate(ponderation = ponder_calc) %>%
                         group_by(get(vars[i])) %>% 
                         summarise(ENSEMBLE = round(sum(ponderation),arrondi)) %>% 
                         rename(Levels = 1) %>% 
@@ -180,9 +182,6 @@ table_auto <- function(data,
       
       if(table_type %in% c("eff","all")){
         tab_eff <- dt %>% 
-          select(all_of(var_col),all_of(vars[i])) %>% 
-          mutate(across(where(is.numeric) |where(is.character) , ~ as.factor(.))) %>% 
-          mutate(ponderation = ponder_calc) %>% 
           group_by(get(var_col),get(vars[i])) %>% 
           summarise(ENSEMBLE = round(sum(ponderation), arrondi), .groups = "drop") %>% 
           rename(Groupe = 1,
@@ -238,9 +237,6 @@ table_auto <- function(data,
       
       if(table_type %in% c("row","all")){
         tab_row <- dt %>% 
-          select(all_of(var_col),all_of(vars[i])) %>%  
-          mutate(across(where(is.numeric) |where(is.character) , ~ as.factor(.))) %>%
-          mutate(ponderation = ponder_calc) %>% 
           group_by(get(var_col),get(vars[i])) %>% 
           summarise(ENSEMBLE = sum(ponderation), .groups = "drop") %>% 
           rename(Groupe = 1,
@@ -296,9 +292,6 @@ table_auto <- function(data,
       
       if(table_type %in% c("col","all")){
         tab_col <- dt %>% 
-          select(all_of(var_col),all_of(vars[i])) %>% 
-          mutate(across(where(is.numeric) |where(is.character) , ~ as.factor(.))) %>%
-          mutate(ponderation = ponder_calc) %>% 
           group_by(get(var_col),get(vars[i])) %>% 
           summarise(ENSEMBLE = sum(ponderation), .groups = "drop") %>% 
           rename(Groupe = 1,
