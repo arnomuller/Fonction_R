@@ -60,7 +60,7 @@ On utilise la fonction `table_auto()` qui ne fait partie d'aucun package, il fau
 **excel_export**   : TRUE ou FALSE, création d'un fichier excel.        
 **excel_filepath** : Chemin et nom du fichier excel (défaut : "table_auto.xlsx")        
 
-
+```{r}
 table_auto(hdv2003,                  # Base de données
            vars,                     # Un vecteur avec les noms des variables d'intérêts
            var_col        = "sexe",  # Variable à croiser avec celles du vecteur
@@ -73,7 +73,7 @@ table_auto(hdv2003,                  # Base de données
            eff_in_name    = TRUE,    # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
            excel_export   = TRUE,    # TRUE/FALSE : Création d'un fichier excel et son chemin
            excel_filepath = "./table_auto.xlsx")   
-
+```
 
 
 ## Import de la fonction `table_auto()`
