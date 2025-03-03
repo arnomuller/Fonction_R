@@ -550,9 +550,9 @@ table_auto <- function(data,                    # Un data.frame
       
       
       if(chi2_test == TRUE){
-        nb_col = length(select(table_auto_row, -c(Var, Levels, pvalue, ddl, chi2_warn)))
+        nb_col = length(select(html_dt, -c(Var, Levels, pvalue, ddl, chi2_warn)))
       } else {
-        nb_col = length(select(table_auto_row, -c(Var, Levels)))
+        nb_col = length(select(html_dt, -c(Var, Levels)))
       }
       
       titre = var_col
