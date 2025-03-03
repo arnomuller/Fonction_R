@@ -72,23 +72,6 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 **view_html**      : TRUE ou FALSE, affiche la table choisie dans table_type en HTML       
 
 
-table_auto(hdv2003,                  # Base de données
-           vars,                     # Un vecteur avec les noms des variables d'intérêts
-           var_col        = "sexe",  # Variable à croiser avec celles du vecteur
-           table_type     = "col",   # Type de table : "all", "eff", "row", "col"
-           var_weight     = "poids", # Variable de pondération, sinon = NULL
-           weight_norm    = FALSE,   # TRUE/FALSE : Normaliser la pondération
-           useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
-           chi2_test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
-           arrondi        = 3,       # Nombre de chiffres après la virgule
-           use_labels     = "no",    # Utiliser les labels : "no", "yes", "both"
-           add_blank_rows = TRUE,    # TRUE/FALSE : Ajout d'une ligne vide entre les variables
-           eff_in_name    = TRUE,    # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
-           excel_export   = FALSE,   # TRUE/FALSE : Création d'un fichier excel puis son chemin
-           excel_filepath = "./table_auto.xlsx",
-           view_html      = TRUE)    # TRUE/FALSE : Afficher la table en HTML
-
-
 
 ## Import de la fonction `table_auto()`
 
