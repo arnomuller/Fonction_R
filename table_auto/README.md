@@ -1,6 +1,6 @@
 # Introduction
 
-Il existe un large éventail de package R consacré à la gestion et la mise en forme de table et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de bonne qualités, leur coût d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
+Il existe un large éventail de package R consacré à la gestion et la mise en forme de table et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de bonne qualité, leur coût d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
 
 table_auto() se veut une fonction facile d'utilisation permettant de compiler des tris uni- ou bivariées sur un grand nombre de variables, d'utiliser une pondération et les exporter dans un document Excel.
 
@@ -8,7 +8,7 @@ Pour une introduction aux tables et à la pondération, voir la [fiche](https://
 
 ## Données d'exemples
 
-Pour illustrer la mise en oeuvre de la fonction, on utilise les données d'exemples *hdv2003* du packages `questionr`. Ces données possèdent à la fois des variables sur des carastéristiques socio-démographiques, des pratiques et des goûts, et propose une variable de pondération : *poids*.
+Pour illustrer la mise en oeuvre de la fonction, on utilise les données d'exemples *hdv2003* du package `questionr`. Ces données possèdent à la fois des variables sur des carastéristiques socio-démographiques, des pratiques et des goûts, et propose une variable de pondération : *poids*.
 
 ```{r filename="Import des données d'exemples", warning=FALSE, message=FALSE}
 
@@ -26,16 +26,20 @@ data("hdv2003")
     -   Les pourcentages lignes
     -   Les poucentages colonnes
     -   Ajout d'un test du chi²
--   Utiliser des pondérations
+-   Utiliser des pondérations (et les normaliser si besoin)
 -   Garder ou non les valeurs manquantes
--   Exporter le tableau obtenu  
+-	Obtenir les résultats d'un test du chi²
+-	Conserver les labels pour les données issues de SAS
+-	Afficher la table en HTML
+-   Exporter le tableau obtenu au format .xlsx
 
 
 # Mise en oeuvre
  
 ## Fonctionnement
 
-On utilise la fonction `table_auto()` qui ne fait partie d'aucun package, il faut donc la charger dans un premier temps dans R. Une fois la fonction chargée, il suffira de la lancer en renseignant les variables, et les options voulues (présence de valeurs manquantes, pondérations, exportation)
+On utilise la fonction `table_auto()` qui ne fait partie d'aucun package, il faut donc la charger dans un premier temps dans R. 
+Une fois la fonction chargée, il suffit de la lancer en renseignant les variables, et les options voulues (présence de valeurs manquantes, pondérations, exportation)
 
 ## Paramètre de la fonction
 
@@ -51,28 +55,38 @@ On utilise la fonction `table_auto()` qui ne fait partie d'aucun package, il fau
 -   Pourcentage colonne : "col"  
 -	Tout                : "all"
                   
-**var_weight**     : Le nom d'une variable de pondération dans data                     
+**var_weight**     : Le nom d'une variable de pondération dans data      
+**weight_norm**	   : TRUE ou FALSE, normaliser la pondération     
 **useNA**          : TRUE ou FALSE, garder ou non les valeurs manquantes      
 **chi2.test**      : TRUE ou FALSE, ajouter une p.value du test du chi²        
-**arrondi**        : Nombre de chiffre après la virgule                           
+**arrondi**        : Nombre de chiffre après la virgule      
+**use_labels**     : Utiliser les labels :    
+- "no"    : N'affiche pas les labels   
+- "yes"   : Utilise les labels si présents   
+- "both"  : Concatene la valeur numérique et le label         
+              
 **add_blank_rows** : TRUE ou FALSE, insérer une ligne vide entre chaque variable     
 **eff_in_name**    : TRUE ou FALSE, ajouter les effectifs dans les noms des modalités   
 **excel_export**   : TRUE ou FALSE, création d'un fichier excel.        
-**excel_filepath** : Chemin et nom du fichier excel (défaut : "table_auto.xlsx")        
+**excel_filepath** : Chemin et nom du fichier excel (défaut : "table_auto.xlsx")    
+**view_html**      : TRUE ou FALSE, affiche la table choisie dans table_type en HTML       
 
 
 table_auto(hdv2003,                  # Base de données
            vars,                     # Un vecteur avec les noms des variables d'intérêts
            var_col        = "sexe",  # Variable à croiser avec celles du vecteur
-           table_type     = "all",   # Type de table : "all", "eff", "row", "col"
+           table_type     = "col",   # Type de table : "all", "eff", "row", "col"
            var_weight     = "poids", # Variable de pondération, sinon = NULL
+           weight_norm    = FALSE,   # TRUE/FALSE : Normaliser la pondération
            useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
-           chi2.test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
+           chi2_test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
            arrondi        = 3,       # Nombre de chiffres après la virgule
+           use_labels     = "no",    # Utiliser les labels : "no", "yes", "both"
            add_blank_rows = TRUE,    # TRUE/FALSE : Ajout d'une ligne vide entre les variables
            eff_in_name    = TRUE,    # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
-           excel_export   = TRUE,    # TRUE/FALSE : Création d'un fichier excel et son chemin
-           excel_filepath = "./table_auto.xlsx")   
+           excel_export   = FALSE,   # TRUE/FALSE : Création d'un fichier excel puis son chemin
+           excel_filepath = "./table_auto.xlsx",
+           view_html      = TRUE)    # TRUE/FALSE : Afficher la table en HTML
 
 
 
@@ -111,14 +125,17 @@ En lançant le code suivant, on crée les data.frames **table_auto_(table_type)*
 table_auto(hdv2003,                  # Base de données
            vars,                     # Un vecteur avec les noms des variables d'intérêts
            var_col        = "sexe",  # Variable à croiser avec celles du vecteur
-           table_type     = "all",   # Type de table : "all", "eff", "row", "col"
+           table_type     = "col",   # Type de table : "all", "eff", "row", "col"
            var_weight     = "poids", # Variable de pondération, sinon = NULL
+           weight_norm    = FALSE,   # TRUE/FALSE : Normaliser la pondération
            useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
-           chi2.test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
-           arrondi        = 3,       # Nombre de chiffres après la virgule
+           chi2_test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
+           arrondi        = 2,       # Nombre de chiffres après la virgule
+           use_labels     = "no",    # Utiliser les labels : "no", "yes", "both"
            add_blank_rows = TRUE,    # TRUE/FALSE : Ajout d'une ligne vide entre les variables
            eff_in_name    = TRUE,    # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
-           excel_export   = TRUE,    # TRUE/FALSE : Création d'un fichier excel et son chemin
-           excel_filepath = "./table_auto.xlsx")   
+           excel_export   = FALSE,   # TRUE/FALSE : Création d'un fichier excel puis son chemin
+           excel_filepath = "./table_auto.xlsx",
+           view_html      = TRUE)    # TRUE/FALSE : Afficher la table en HTML
 
 ```

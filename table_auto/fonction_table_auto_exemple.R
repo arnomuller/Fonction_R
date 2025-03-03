@@ -23,12 +23,15 @@ vars
 table_auto(hdv2003,                  # Base de données
            vars,                     # Un vecteur avec les noms des variables d'intérêts
            var_col        = "sexe",  # Variable à croiser avec celles du vecteur
-           table_type     = "all",   # Type de table : "all", "eff", "row", "col"
+           table_type     = "col",   # Type de table : "all", "eff", "row", "col"
            var_weight     = "poids", # Variable de pondération, sinon = NULL
+           weight_norm    = FALSE,   # TRUE/FALSE : Normaliser la pondération
            useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
-           chi2.test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
+           chi2_test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
            arrondi        = 3,       # Nombre de chiffres après la virgule
+           use_labels     = "no",    # Utiliser les labels : "no", "yes", "both"
            add_blank_rows = TRUE,    # TRUE/FALSE : Ajout d'une ligne vide entre les variables
            eff_in_name    = TRUE,    # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
-           excel_export   = TRUE,    # TRUE/FALSE : Création d'un fichier excel et son chemin
-           excel_filepath = "./table_auto.xlsx")   
+           excel_export   = FALSE,   # TRUE/FALSE : Création d'un fichier excel puis son chemin
+           excel_filepath = "./table_auto.xlsx",
+           view_html      = TRUE)    # TRUE/FALSE : Afficher la table en HTML

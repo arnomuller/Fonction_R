@@ -3,52 +3,40 @@
 ####################################
 
 
-## PARAMETRES ----
-
-# data           : Un data.frame
-# vars           : Un vecteur avec les noms de variables de donnee
-# var_col        : Le nom d'une variable, ex : "sexe"
-# var_weight     : Le nom d'une variable, ex : "poids"
-# table_type     : "eff", "row", "col", "all"
-# useNA          : TRUE ou FALSE
-# chi2.test      : TRUE ou FALSE
-# arrondi        : Un chiffre
-# add_blank_rows : TRUE ou FALSE
-# eff_in_name    : TRUE ou FALSE
-# excel_export   : TRUE ou FALSE
-# excel_filepath : Chemin vers le fichier excel
-
-
 ## PACKAGES ----
 
-library(tidyverse)
-library(openxlsx)
+# library(tidyverse)
+# library(openxlsx)
 
 
 ## FONCTION ----
 
 # Lancer la fonction suivante pour pourvoir l'appeler dans vos prochains scripts :
 
-table_auto <- function(data, 
-                       vars,
-                       var_col        = NULL,
-                       var_weight     = NULL,
-                       table_type     = "all",
-                       useNA          = TRUE,
-                       chi2.test      = TRUE,
-                       arrondi        = 2,
-                       add_blank_rows = TRUE,
-                       eff_in_name    = TRUE,
-                       excel_export   = FALSE,
-                       excel_filepath = "./table_auto.xlsx"){
+table_auto <- function(data,                    # Un data.frame
+                       vars,                    # Un vecteur avec les noms des variables d'intérêts
+                       var_col        = NULL,   # Variable à croiser avec celles du vecteur
+                       var_weight     = NULL,   # Variable de pondération, sinon = NULL
+                       weight_norm    = FALSE,  # Normaliser la 
+                       table_type     = "all",  # Type de table : "all", "eff", "row", "col"
+                       useNA          = TRUE,   # TRUE/FALSE : Ajout des valeurs manquantes
+                       chi2_test      = TRUE,   # TRUE/FALSE : Ajout du test du Chi²
+                       arrondi        = 2,      # Nombre de chiffres après la virgule
+                       use_labels     = "no",   # Utiliser les labels : "no", "yes", "both"
+                       add_blank_rows = TRUE,   # TRUE/FALSE : Ajout d'une ligne vide entre les variables
+                       eff_in_name    = TRUE,   # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
+                       excel_export   = FALSE,  # TRUE/FALSE : Création d'un fichier excel et son chemin
+                       excel_filepath = "./table_auto.xlsx", # Chemin vers le fichier excel
+                       view_html      = TRUE    # TRUE/FALSE : Affiche la table en HTML
+){
   
-  ### OPTIONS ----
+  ### OPTIONS                ----
   # Ecriture scientifique
   options(scipen=9999)
   
-  ### GESTION LIBRARY ----
+  ### GESTION LIBRARY        ----
   # Liste des packages à charger
-  packages <- c("tidyverse", "openxlsx")
+  packages <- c("tidyverse", "openxlsx", "haven")
   # Vérifier si les packages sont déjà installés
   missing_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
   # Installer les packages manquants
@@ -61,11 +49,16 @@ table_auto <- function(data,
   
   
   
-  ### GESTION DES ERREURS ----
+  ### GESTION DES ERREURS    ----
   
   # Vérification du parametre table_type
   if (table_type != "eff" && table_type != "row" && table_type != "col" && table_type != "all") {
     stop("Erreur : table_type doit être 'eff', 'row', 'col' ou 'all' ")
+  }
+  
+  # Vérification du parametre use_labels
+  if (use_labels != "no" && use_labels != "yes" && use_labels != "both") {
+    stop("Erreur : use_labels doit être 'no', 'yes', ou 'both' ")
   }
   
   # Vérification de parametre useNA
@@ -73,9 +66,9 @@ table_auto <- function(data,
     stop("Erreur : useNA doit être TRUE ou FALSE")
   }
   
-  # Vérification de parametre chi2.test
-  if (chi2.test != TRUE && chi2.test != FALSE) {
-    stop("Erreur : chi2.test doit être TRUE ou FALSE")
+  # Vérification de parametre chi2_test
+  if (chi2_test != TRUE && chi2_test != FALSE) {
+    stop("Erreur : chi2_test doit être TRUE ou FALSE")
   }
   
   # Vérification de parametre add_blank_rows
@@ -93,6 +86,11 @@ table_auto <- function(data,
     stop("Erreur : excel_export doit être TRUE ou FALSE")
   }
   
+  # Vérification de parametre weight_norm
+  if (weight_norm != TRUE && weight_norm != FALSE) {
+    stop("Erreur : weight_norm doit être TRUE ou FALSE")
+  }
+  
   
   ### GESTION DES PARAMETRES ----
   
@@ -100,16 +98,41 @@ table_auto <- function(data,
   # Variable pondération :
   if(is.null(var_weight) == T){
     ponder_calc <- rep(1,nrow(data))
-  }else{
+  }else if (weight_norm == FALSE){
     ponder_calc <- with(data,get(var_weight))
+  }else {
+    ponder_calc <- (with(data,get(var_weight))*nrow(data))/sum(with(data,get(var_weight)))
   }
   
-  # Données :
-  dt <- data %>% 
-    mutate(ponderation = ponder_calc) %>% 
-    select(any_of(c(vars,var_col)),ponderation) %>% 
-    mutate(across(!matches("ponderation"), as.factor))
-
+  
+  # Données et labels:
+  
+  if (use_labels == "no") {
+    dt <- data %>% 
+      mutate(ponderation = ponder_calc) %>% 
+      select(any_of(c(vars,var_col)),ponderation) %>% 
+      mutate(across(!matches("ponderation"), as.factor))
+  } else if (use_labels == "yes"){
+    dt <- data %>% 
+      mutate(ponderation = ponder_calc) %>% 
+      select(any_of(c(vars,var_col)),ponderation) %>% 
+      mutate(across(where(~ !is.null(attr(.x, "labels"))), haven::as_factor)) %>% 
+      mutate(across(where(~ is.null(attr(.x, "labels"))) & !matches("ponderation"), as.factor))
+    
+    
+  } else if (use_labels == "both"){
+    dt <- data %>% 
+      mutate(ponderation = ponder_calc) %>% 
+      select(any_of(c(vars,var_col)),ponderation) %>% 
+      mutate(across(!matches("ponderation"), ~case_when(
+        is.na(.) ~ NA,
+        is.null(attributes(.)$labels) ~ as.factor(.),
+        TRUE ~ paste0(as.factor(.)," : ",as_factor(.)))
+      ))
+  }
+  
+  
+  ### BOUCLES                ----
   
   
   # Création table
@@ -119,27 +142,34 @@ table_auto <- function(data,
   desc_bi_col <- data.frame()
   
   
-  
   for (i in c(1:length(vars))) {
-
+    
     ### Création du tri à plat
-    desc_uni <- rbind(desc_uni,
-                      dt %>% 
-                        group_by(get(vars[i])) %>% 
-                        summarise(ENSEMBLE = round(sum(ponderation),arrondi)) %>% 
-                        rename(Levels = 1) %>% 
-                        mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
-                               Levels = factor(Levels, 
-                                               levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq."))) %>% 
-                        mutate(Var = vars[i]) %>%  
-                        select(Var,Levels,ENSEMBLE) %>% 
-                        mutate(Freq = round((ENSEMBLE*100)/sum(ENSEMBLE),arrondi))) 
+    tabuni <- dt %>% 
+      group_by(get(vars[i])) %>% 
+      summarise(ENSEMBLE = round(sum(ponderation),arrondi)) %>% 
+      rename(Levels = 1) %>% 
+      mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
+             Levels = factor(Levels, 
+                             levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq."))) %>% 
+      mutate(Var = vars[i]) %>%  
+      select(Var,Levels,ENSEMBLE)
+    
     
     # Gestion des NA
     if(useNA == FALSE){
-      desc_uni <- desc_uni %>% 
+      tabuni <- tabuni %>% 
         filter(Levels != "Val.Manq." | is.na(Levels) == TRUE )
     }
+    
+    tabuni = tabuni %>% 
+      mutate(Freq = (ENSEMBLE*100)/sum(ENSEMBLE),
+             FreqCum = cumsum(Freq)) |>  
+      mutate(Freq = round(Freq,arrondi),
+             FreqCum = round(FreqCum,arrondi)) 
+    
+    desc_uni <- rbind(desc_uni,tabuni)
+    
     
     # Ajout de ligne blanche entre les variables
     if(add_blank_rows == TRUE){
@@ -147,13 +177,12 @@ table_auto <- function(data,
     }
     
     
-    
-    
     ### Création tri croisé si var_col
     if(is.null(var_col) == FALSE){
       
+      
       # CHI²
-      if(chi2.test == TRUE){
+      if(chi2_test == TRUE){
         # Sauvegarde la table du chi² et on capture le message d'erreur (s'il y en a)
         
         chi2 <<- chisq.test(xtabs(ponder_calc~
@@ -180,39 +209,37 @@ table_auto <- function(data,
       
       # La table :
       
+      tab_commune <- dt %>% 
+        group_by(get(var_col),get(vars[i])) %>% 
+        summarise(ENSEMBLE = sum(ponderation), .groups = "drop") %>% 
+        rename(Groupe = 1,
+               Levels = 2) %>% 
+        mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
+               Groupe = if_else(is.na(Groupe), "Val.Manq.", Groupe)) %>% 
+        complete(Groupe, Levels, fill = list(ENSEMBLE = 0)) %>% 
+        mutate(Levels = factor(Levels, levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq.")),
+               Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq."))) %>% 
+        arrange(Groupe,Levels)
+      
+      
+      # Gestion des NA
+      if(useNA == FALSE){
+        tab_commune <- tab_commune %>% 
+          filter(Levels != "Val.Manq."| is.na(Levels) == TRUE) %>% 
+          filter(Groupe != "Val.Manq."| is.na(Groupe) == TRUE)
+      }
+      
+      
       if(table_type %in% c("eff","all")){
-        tab_eff <- dt %>% 
-          group_by(get(var_col),get(vars[i])) %>% 
-          summarise(ENSEMBLE = round(sum(ponderation), arrondi), .groups = "drop") %>% 
-          rename(Groupe = 1,
-                 Levels = 2) %>% 
-          mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
-                 Groupe = if_else(is.na(Groupe), "Val.Manq.", Groupe)) %>% 
-          complete(Groupe, Levels, fill = list(ENSEMBLE = 0)) %>% 
-          mutate(Levels = factor(Levels, levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq.")),
-                 Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq."))) %>% 
-          arrange(Groupe,Levels) %>% 
+        tab_eff <- tab_commune %>% 
+          mutate(ENSEMBLE = round(ENSEMBLE,arrondi)) |> 
           pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
           mutate(Var = vars[i]) %>%  
           select(Var,Levels,everything()) %>% 
           left_join(select(desc_uni, Var,Levels, ENSEMBLE), by = c("Var","Levels"))
         
-        
-        # Gestion des NA
-        if(useNA == FALSE){
-          if(any(is.na(names(with(dt,table(get(var_col),useNA = "ifany")))))){
-            tab_eff <- tab_eff %>% 
-              select(-Val.Manq.) %>% 
-              filter(Levels != "Val.Manq."| is.na(Levels) == TRUE)
-          } else{
-            tab_eff <- tab_eff %>% 
-              filter(Levels != "Val.Manq."| is.na(Levels) == TRUE)
-          }
-        }
-        
-        
         # Variables du Chi²
-        if(chi2.test == TRUE){
+        if(chi2_test == TRUE){
           tab_eff <- tab_eff %>% mutate(
             pvalue = round(chi2$p.value,3),
             ddl = chi2$parameter,
@@ -232,45 +259,21 @@ table_auto <- function(data,
       } # FIN eff
       
       
-      
-      
-      
       if(table_type %in% c("row","all")){
-        tab_row <- dt %>% 
-          group_by(get(var_col),get(vars[i])) %>% 
-          summarise(ENSEMBLE = sum(ponderation), .groups = "drop") %>% 
-          rename(Groupe = 1,
-                 Levels = 2) %>% 
-          mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
-                 Groupe = if_else(is.na(Groupe), "Val.Manq.", Groupe)) %>% 
-          complete(Groupe, Levels, fill = list(ENSEMBLE = 0)) %>% 
-          mutate(Levels = factor(Levels, levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq.")),
-                 Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq."))) %>% 
-          arrange(Groupe,Levels) %>%
+        
+        tab_row <- tab_commune |> 
           # Pourcentage Row
           group_by(Levels) %>% 
-          mutate(ENSEMBLE = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
-          pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
+          mutate(Value = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
+          mutate(ENSEMBLE = sum(Value)) |> 
+          pivot_wider(names_from = Groupe, values_from = Value)  %>% 
           mutate(Var = vars[i]) %>%  
-          select(Var,Levels,everything()) %>% 
-          mutate(ENSEMBLE = 100) %>% 
+          select(Var,Levels,everything()) %>%  
+          relocate(ENSEMBLE, .after = last_col()) %>% 
           ungroup()
         
-        
-        # Gestion des NA
-        if(useNA == FALSE){
-          if(any(is.na(names(with(dt,table(get(var_col),useNA = "ifany")))))){
-            tab_row <- tab_row %>% 
-              select(-Val.Manq.) %>% 
-              filter(Levels != "Val.Manq."| is.na(Levels) == TRUE)
-          } else{
-            tab_row <- tab_row %>% 
-              filter(Levels != "Val.Manq."| is.na(Levels) == TRUE)
-          }
-        }
-        
         # Variables du Chi²
-        if(chi2.test == TRUE){
+        if(chi2_test == TRUE){
           tab_row <- tab_row %>% mutate(
             pvalue = round(chi2$p.value,3),
             ddl = chi2$parameter,
@@ -291,18 +294,9 @@ table_auto <- function(data,
       
       
       if(table_type %in% c("col","all")){
-        tab_col <- dt %>% 
-          group_by(get(var_col),get(vars[i])) %>% 
-          summarise(ENSEMBLE = sum(ponderation), .groups = "drop") %>% 
-          rename(Groupe = 1,
-                 Levels = 2) %>% 
-          mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
-                 Groupe = if_else(is.na(Groupe), "Val.Manq.", Groupe)) %>% 
-          complete(Groupe, Levels, fill = list(ENSEMBLE = 0)) %>% 
-          mutate(Levels = factor(Levels, levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq.")),
-                 Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq."))) %>% 
-          arrange(Groupe,Levels) %>%
-          # Pourcentage Row
+        
+        tab_col <- tab_commune %>%
+          # Pourcentage Col
           group_by(Groupe) %>% 
           mutate(ENSEMBLE = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
           pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
@@ -312,20 +306,8 @@ table_auto <- function(data,
           rename(ENSEMBLE=Freq) %>% 
           ungroup()
         
-        # Gestion des NA
-        if(useNA == FALSE){
-          if(any(is.na(names(with(dt,table(get(var_col),useNA = "ifany")))))){
-            tab_col <- tab_col %>% 
-              select(-Val.Manq.) %>% 
-              filter(Levels != "Val.Manq."| is.na(Levels) == TRUE)
-          } else{
-            tab_col <- tab_col %>% 
-              filter(Levels != "Val.Manq."| is.na(Levels) == TRUE)
-          }
-        }
-        
         # Variables du Chi²
-        if(chi2.test == TRUE){
+        if(chi2_test == TRUE){
           tab_col <- tab_col %>% mutate(
             pvalue = round(chi2$p.value,3),
             ddl = chi2$parameter,
@@ -344,11 +326,6 @@ table_auto <- function(data,
         
       } # FIN col
       
-      
-      
-      
-      
-      
     } # Fin Var Croisé
   } # Fin Boucle
   
@@ -358,7 +335,8 @@ table_auto <- function(data,
   
   first_row <- dt %>% mutate(ponderation = ponder_calc) %>% 
     summarise(ENSEMBLE = round(sum(ponderation),arrondi)) %>% 
-    mutate(Freq = 100) %>% 
+    mutate(Freq = 100,
+           FreqCum = 100) %>% 
     mutate(Var =" ",
            Levels = "ENSEMBLE") %>%  
     select(Var, Levels,everything())
@@ -511,6 +489,8 @@ table_auto <- function(data,
   
   
   
+  ### EXPORT                 ----
+  
   # Export
   if(excel_export == TRUE){
     
@@ -549,6 +529,119 @@ table_auto <- function(data,
         
       }
       saveWorkbook(wb, excel_filepath, overwrite = TRUE)  
+      
+    }
+  }
+  
+  
+  ### HTML                   ----
+  
+  if(view_html == TRUE){
+    
+    if(!is.null(var_col)){
+      
+      if(table_type == "row"){
+        html_dt = table_auto_row
+      } else if(table_type == "col"){
+        html_dt = table_auto_col
+      } else {
+        html_dt = table_auto_eff
+      }
+      
+      
+      if(chi2_test == TRUE){
+        nb_col = length(select(table_auto_row, -c(Var, Levels, pvalue, ddl, chi2_warn)))
+      } else {
+        nb_col = length(select(table_auto_row, -c(Var, Levels)))
+      }
+      
+      titre = var_col
+      
+      html_dt                       |> 
+        filter(is.na(Var) == FALSE) |> 
+        group_by(Var)               |> 
+        gt()                        |>
+        # Titre ligne du haut
+        tab_spanner(
+          label = html(titre),
+          columns = c(3: (3+nb_col-1))) |>
+        # Alignement du texte
+        cols_align(
+          align = "center",
+          columns = c(3:(length(html_dt)))
+        )                           |>
+        cols_align(
+          align = "right",
+          columns = 2)              |>
+        # Centrer les titres des colonnes en hauteur
+        tab_style(
+          style = list(
+            cell_text(align = "center", v_align = "middle") # v_align pour la hauteur
+          ),
+          locations = cells_column_labels()
+        )                           |> 
+        tab_style(
+          style = cell_fill(color = "#f5ffed"),
+          locations = cells_row_groups()
+        )                           |>
+        # Supprimer les bordures 
+        tab_style(
+          style = list(
+            cell_borders(
+              sides = "top",          # Supprimer la bordure en bas
+              color = "black",        # Couleur invisible
+              weight = px(2)          # Aucune épaisseur
+            )
+          ),
+          locations = cells_row_groups()
+        )                            |> 
+        tab_style(
+          style = list(
+            cell_text(weight = "bold")
+          ),
+          locations = cells_column_spanners()
+        )
+      
+    } else {
+      
+      table_auto_univar             |> 
+        rename(`Fréquences` = Freq,
+               `Fréquences cumulées` = FreqCum) |> 
+        filter(is.na(Var) == FALSE) |> 
+        group_by(Var)               |> 
+        gt()                        |>
+        
+        # Alignement du texte
+        cols_align(
+          align = "center",
+          columns = c(3:(length(table_auto_univar)))
+        )                           |>
+        cols_align(
+          align = "right",
+          columns = 2)              |>
+        
+        # Centrer les titres des colonnes en hauteur
+        tab_style(
+          style = list(
+            cell_text(align = "center", v_align = "middle") # v_align pour la hauteur
+          ),
+          locations = cells_column_labels()
+        )                           |> 
+        tab_style(
+          style = cell_fill(color = "#f5ffed"),
+          locations = cells_row_groups()
+        )                           |>
+        # Supprimer les bordures 
+        tab_style(
+          style = list(
+            cell_borders(
+              sides = "top",          # Supprimer la bordure en bas
+              color = "black",  # Couleur invisible
+              weight = px(2)          # Aucune épaisseur
+            )
+          ),
+          locations = cells_row_groups()
+        )                       
       
     }
   }
