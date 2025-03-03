@@ -7,7 +7,8 @@
 
 # library(tidyverse)
 # library(openxlsx)
-
+# library(haven)
+# library(gt)
 
 ## FONCTION ----
 
@@ -36,7 +37,7 @@ table_auto <- function(data,                    # Un data.frame
   
   ### GESTION LIBRARY        ----
   # Liste des packages à charger
-  packages <- c("tidyverse", "openxlsx", "haven")
+  packages <- c("tidyverse", "openxlsx", "haven", "gt")
   # Vérifier si les packages sont déjà installés
   missing_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
   # Installer les packages manquants

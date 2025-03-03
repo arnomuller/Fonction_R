@@ -23,7 +23,7 @@ vars
 table_auto(hdv2003,                  # Base de données
            vars,                     # Un vecteur avec les noms des variables d'intérêts
            var_col        = "sexe",  # Variable à croiser avec celles du vecteur
-           table_type     = "col",   # Type de table : "all", "eff", "row", "col"
+           table_type     = "all",   # Type de table : "all", "eff", "row", "col"
            var_weight     = "poids", # Variable de pondération, sinon = NULL
            weight_norm    = FALSE,   # TRUE/FALSE : Normaliser la pondération
            useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes

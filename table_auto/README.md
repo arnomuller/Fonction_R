@@ -1,6 +1,6 @@
 # Introduction
 
-Il existe un large éventail de package R consacré à la gestion et la mise en forme de table et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de bonne qualité, leur coût d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
+Il existe un large éventail de package R consacrés à la gestion et la mise en forme de table et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de bonne qualité, leur coût d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
 
 table_auto() se veut une fonction facile d'utilisation permettant de compiler des tris uni- ou bivariées sur un grand nombre de variables, d'utiliser une pondération et les exporter dans un document Excel.
 
@@ -8,7 +8,7 @@ Pour une introduction aux tables et à la pondération, voir la [fiche](https://
 
 ## Données d'exemples
 
-Pour illustrer la mise en oeuvre de la fonction, on utilise les données d'exemples *hdv2003* du package `questionr`. Ces données possèdent à la fois des variables sur des carastéristiques socio-démographiques, des pratiques et des goûts, et propose une variable de pondération : *poids*.
+Pour illustrer la mise en oeuvre de la fonction, on utilise les données d'exemples *hdv2003* du package `questionr`. Ces données possèdent à la fois des variables sur des caractéristiques socio-démographiques, des pratiques et des goûts, et propose une variable de pondération : *poids*.
 
 ```{r filename="Import des données d'exemples", warning=FALSE, message=FALSE}
 
@@ -24,7 +24,7 @@ data("hdv2003")
 -   Croiser ces variables avec une variable choisie, par exemple le sexe ou la qualification et obtenir :
     -   Les effectifs
     -   Les pourcentages lignes
-    -   Les poucentages colonnes
+    -   Les pourcentages colonnes
     -   Ajout d'un test du chi²
 -   Utiliser des pondérations (et les normaliser si besoin)
 -   Garder ou non les valeurs manquantes
@@ -61,9 +61,9 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 **chi2.test**      : TRUE ou FALSE, ajouter une p.value du test du chi²        
 **arrondi**        : Nombre de chiffre après la virgule      
 **use_labels**     : Utiliser les labels :    
-- "no"    : N'affiche pas les labels   
-- "yes"   : Utilise les labels si présents   
-- "both"  : Concatene la valeur numérique et le label         
+- "no"    : n'affiche pas les labels   
+- "yes"   : utilise les labels si présents   
+- "both"  : concatène la valeur numérique et le label         
               
 **add_blank_rows** : TRUE ou FALSE, insérer une ligne vide entre chaque variable     
 **eff_in_name**    : TRUE ou FALSE, ajouter les effectifs dans les noms des modalités   
@@ -75,7 +75,7 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 
 ## Import de la fonction `table_auto()`
 
-Pour l'instant la fonction ne se trouve pas dans un package, il faut donc la charger dans l'environnement global de R depuis GitHub en utilisant le code suivant.  
+Pour l'instant, la fonction ne se trouve pas dans un package, il faut donc la charger dans l'environnement global de R depuis GitHub en utilisant le code suivant.  
 
 
 ```{r filename="Import de la fonction depuis Github"}
