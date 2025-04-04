@@ -20,18 +20,19 @@ data("hdv2003")
 
 ## Objectifs :
 
--   Obtenir une table automatique avec les tris à plat d'un grand nombre de variables
--   Croiser ces variables avec une variable choisie, par exemple le sexe ou la qualification et obtenir :
-    -   Les effectifs
-    -   Les pourcentages lignes
-    -   Les pourcentages colonnes
-    -   Ajout d'un test du chi²
--   Utiliser des pondérations (et les normaliser si besoin)
--   Garder ou non les valeurs manquantes
--	Obtenir les résultats d'un test du chi²
--	Conserver les labels pour les données issues de SAS
--	Afficher la table en HTML
--   Exporter le tableau obtenu au format .xlsx
+-   Obtenir une table automatique avec les tris à plat d'un grand nombre de variables  
+-   Croiser ces variables avec une variable choisie, par exemple le sexe ou la qualification et obtenir :  
+    -   Les effectifs  
+    -   Les pourcentages lignes  
+    -   Les pourcentages colonnes  
+-	Obtenir une table de la combinaison des réponses possibles aux variables présentes  
+-   Utiliser des pondérations (et les normaliser si besoin)  
+-   Garder ou non les valeurs manquantes  
+-   Exclure des modalités choisies  
+-	Obtenir les résultats d'un test (chi², ou fisher)  
+-	Conserver les labels pour les données issues de SAS  
+-	Afficher la table en HTML  
+-   Exporter le tableau obtenu au format .xlsx  
 
 
 # Mise en oeuvre
@@ -50,15 +51,22 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 - Si une variable : Tris croisés
 
 **table_type**     :  
--   Effectifs           : "eff"      
--   Pourcentage ligne   : "row"  
--   Pourcentage colonne : "col"  
--	Tout                : "all"
+-   Effectifs        		    : "eff"      
+-   Pourcentage ligne  		    : "row"  
+-   Pourcentage colonne 		: "col"  
+-	Tout                        : "all"
+-	La combinaison des réponses : "mix"  
                   
 **var_weight**     : Le nom d'une variable de pondération dans data      
 **weight_norm**	   : TRUE ou FALSE, normaliser la pondération     
-**useNA**          : TRUE ou FALSE, garder ou non les valeurs manquantes      
-**chi2.test**      : TRUE ou FALSE, ajouter une p.value du test du chi²        
+**useNA**          : TRUE ou FALSE, garder ou non les valeurs manquantes    
+**exclude**        : Un vecteur avec les noms des modalités à exclure des tables    
+**use_test**       :   
+-	Pas de test 	 : "no"  
+-	Chi²  	  	     : "chi2"  
+-	Chi² non pondéré : "chi2_noponder"  
+-	Fisher 			 : "fisher"  
+
 **arrondi**        : Nombre de chiffre après la virgule      
 **use_labels**     : Utiliser les labels :    
 - "no"    : n'affiche pas les labels   
@@ -105,20 +113,21 @@ En lançant le code suivant, on crée les data.frames **table_auto_(table_type)*
 
 ```{r filename="Activation de la fonction", warning=FALSE, message=FALSE}
 
-table_auto(hdv2003,                  # Base de données
-           vars,                     # Un vecteur avec les noms des variables d'intérêts
-           var_col        = "sexe",  # Variable à croiser avec celles du vecteur
-           table_type     = "col",   # Type de table : "all", "eff", "row", "col"
-           var_weight     = "poids", # Variable de pondération, sinon = NULL
-           weight_norm    = FALSE,   # TRUE/FALSE : Normaliser la pondération
-           useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
-           chi2_test      = TRUE,    # TRUE/FALSE : Ajout du test du Chi²
-           arrondi        = 2,       # Nombre de chiffres après la virgule
-           use_labels     = "no",    # Utiliser les labels : "no", "yes", "both"
-           add_blank_rows = TRUE,    # TRUE/FALSE : Ajout d'une ligne vide entre les variables
-           eff_in_name    = TRUE,    # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
-           excel_export   = FALSE,   # TRUE/FALSE : Création d'un fichier excel puis son chemin
-           excel_filepath = "./table_auto.xlsx",
-           view_html      = TRUE)    # TRUE/FALSE : Afficher la table en HTML
+table_auto(hdv2003,                    # Base de données
+           mes_vars,                   # Un vecteur avec les noms des variables d'intérêts
+           var_col        = "qualif",  # Variable à croiser avec celles du vecteur
+           table_type     = "all",     # Type de table : "all", "eff", "row", "col", ou "mix"
+           var_weight     = "poids",   # Variable de pondération, sinon = NULL
+           weight_norm    = FALSE,     # TRUE/FALSE : Normaliser la pondération
+           useNA          = FALSE,     # TRUE/FALSE : Ajout des valeurs manquantes
+           exclude        = junk,      # exclure des modalités
+           use_test       = "chi2",    # Type de test : "chi2", "fisher", "chi2_noponder", "no"
+           arrondi        = 2,         # Nombre de chiffres après la virgule
+           use_labels     = "no",      # Utiliser les labels : "no", "yes", "both"
+           add_blank_rows = TRUE,      # TRUE/FALSE : Ajout d'une ligne vide entre les variables
+           eff_in_name    = TRUE,      # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
+           excel_export   = FALSE,     # TRUE/FALSE : Création d'un fichier excel puis son chemin
+           excel_filepath = "./table_auto.xlsx", # Seulement si excel_export = TRUE
+           view_html      = TRUE)      # TRUE/FALSE : Afficher la table en HTML
 
 ```
