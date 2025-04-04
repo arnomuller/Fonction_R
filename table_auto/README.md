@@ -105,6 +105,16 @@ mes_vars <- c("relig","trav.imp","trav.satisf","hard.rock",
 
 ```
 
+## Suppression de certaines modalités
+
+On peut définir des modalités qui ne doivent pas être utilisées (le total changera donc d'une variable à l'autre).  
+
+```{r filename="Choix des modalités à exclure"}
+# Exemple avec une modalité
+junk = c("NSP ou NVPR") 
+# Exemple avec trois modalités
+junk = c("NSP ou NVPR", "Cadre", "Rejet")
+```
 
 
 ## Création du tableau empilé
