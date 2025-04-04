@@ -99,7 +99,7 @@ On définit les variables à croiser :
 
 ```{r filename="Choix des variables"}
 
-vars      <- c("relig","trav.imp","trav.satisf","hard.rock",
+mes_vars <- c("relig","trav.imp","trav.satisf","hard.rock",
                "lecture.bd","peche.chasse","cuisine",
                "bricol","cinema","sport")
 
