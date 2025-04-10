@@ -14,6 +14,10 @@
 
 ## MESSAGES ----
 
+print("MAJ : 10/04/2025")
+print("")
+print("Correction crash avec le chi2 pondéré")
+print("")
 print("MAJ : 04/04/2025")
 print("")
 print("Remplace l'option chi2_test, par use_test : pour choisir le test du chi2 ou le test de fisher")
@@ -279,6 +283,7 @@ table_auto <- function(data,                    # Un data.frame
             tab_test = xtabs(~var1+var2,data=tempo)
             test = chisq.test(tab_test)
             ddl = test$parameter
+            pvalue = round(test$p.value,3)
             
             # Warning si Pct > 20
             warning = as.data.frame(test$expected) |> 
@@ -296,17 +301,38 @@ table_auto <- function(data,                    # Un data.frame
           } else {
             
             tab_test  = survey::svydesign(id = ~ 1, weights = tempo$ponderation, data = tempo )
-            test = survey::svychisq(~ var1 + var2, tab_test, statistic="F")
             
-            ddl = round(test$parameter[1],1)
+            #test = survey::svychisq(~ var1 + var2, tab_test, statistic="F")
             
-            # Warning si Pct > 20
-            warning = as.data.frame(test$expected) |> 
-              pivot_longer(1:ncol(test$expected))  |> 
-              mutate(n5 = ifelse(value <= 5, 1,0),
-                     n5 = ifelse(value < 1, 1000,n5)) |> 
-              summarise(Eff = sum(n5),
-                        Pct = sum(n5)*100/n())
+            test = tryCatch({
+              svychisq(~ var1 + var2, tab_test, statistic="F")
+            },error = function(e) {
+              message("ATTENTION : les chi2 ne sont pas calculés : des cases doivent avoir trop peu d'effectifs.
+Peut-être qu'un test de Fisher serait plus adapté")
+              NA  # Returning NULL in case of an error in outlier detection
+            })
+            
+            
+            
+            if(length(test) < 2){
+              warning = data.frame(
+                Eff = 9999,
+                Pct = 100
+              )
+              ddl = NA
+              pvalue = NA
+              
+            } else{
+              warning = as.data.frame(test$expected) |> 
+                pivot_longer(1:ncol(test$expected))  |> 
+                mutate(n5 = ifelse(value <= 5, 1,0),
+                       n5 = ifelse(value < 1, 1000,n5)) |> 
+                summarise(Eff = sum(n5),
+                          Pct = sum(n5)*100/n())
+              
+              ddl = round(test$parameter[1],1)
+              pvalue = round(test$p.value,3)
+            }
             
             
             # Save message 
@@ -327,6 +353,7 @@ table_auto <- function(data,                    # Un data.frame
           tab_test = xtabs(~var1+var2,data=tempo)
           test = chisq.test(tab_test)
           ddl = test$parameter
+          pvalue = round(test$p.value,3)
           
           warning = as.data.frame(test$expected) |> 
             pivot_longer(1:ncol(test$expected))  |> 
@@ -363,7 +390,7 @@ table_auto <- function(data,                    # Un data.frame
         # Variables du Chi²
         if(use_test %in% c("chi2", "chi2_noponder")){
           tab_eff <- tab_eff %>% mutate(
-            chi2_pvalue = round(test$p.value,3),
+            chi2_pvalue = pvalue,
             chi2_ddl = ddl,
             chi2_warn = "OK")
           # S'il y a un warning dans chisq.test
@@ -406,7 +433,7 @@ table_auto <- function(data,                    # Un data.frame
         # Variables du Chi²
         if(use_test %in% c("chi2", "chi2_noponder")){
           tab_row <- tab_row %>% mutate(
-            chi2_pvalue = round(test$p.value,3),
+            chi2_pvalue = pvalue,
             chi2_ddl = ddl,
             chi2_warn = "OK")
           # S'il y a un warning dans chisq.test
@@ -449,7 +476,7 @@ table_auto <- function(data,                    # Un data.frame
         # Variables du Chi²
         if(use_test %in% c("chi2", "chi2_noponder")){
           tab_col <- tab_col %>% mutate(
-            chi2_pvalue = round(test$p.value,3),
+            chi2_pvalue = pvalue,
             chi2_ddl = ddl,
             chi2_warn = "OK")
           # S'il y a un warning dans chisq.test
