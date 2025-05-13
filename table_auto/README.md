@@ -74,7 +74,10 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 - "both"  : concatène la valeur numérique et le label         
               
 **add_blank_rows** : TRUE ou FALSE, insérer une ligne vide entre chaque variable     
-**eff_in_name**    : TRUE ou FALSE, ajouter les effectifs dans les noms des modalités   
+**eff_in_name**    : Ajouter les effectifs dans les noms des modalités   
+- "no"        : n'affiche pas les effectifs   
+- "yes"       : affiche les effectifs   
+- "noponder"  : affiche les effectifs non-pondérés     
 **excel_export**   : TRUE ou FALSE, création d'un fichier excel.        
 **excel_filepath** : Chemin et nom du fichier excel (défaut : "table_auto.xlsx")    
 **view_html**      : TRUE ou FALSE, affiche la table choisie dans table_type en HTML       
@@ -135,7 +138,7 @@ table_auto(hdv2003,                    # Base de données
            arrondi        = 2,         # Nombre de chiffres après la virgule
            use_labels     = "no",      # Utiliser les labels : "no", "yes", "both"
            add_blank_rows = TRUE,      # TRUE/FALSE : Ajout d'une ligne vide entre les variables
-           eff_in_name    = TRUE,      # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
+           eff_in_name    = TRUE,      # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
            excel_export   = FALSE,     # TRUE/FALSE : Création d'un fichier excel puis son chemin
            excel_filepath = "./table_auto.xlsx", # Seulement si excel_export = TRUE
            view_html      = TRUE)      # TRUE/FALSE : Afficher la table en HTML

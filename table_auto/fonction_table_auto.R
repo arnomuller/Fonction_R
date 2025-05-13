@@ -14,17 +14,16 @@
 
 ## MESSAGES ----
 
-print("MAJ : 10/04/2025")
+print("DERNIERES MÀJ : ")
+
+print("MAJ : 13/05/2025")
 print("")
-print("Correction crash avec le chi2 pondéré")
+print("1) CHANGEMENT option : eff_in_name")
+print("yes = effectifs dans les noms de modalités")
+print("no = pas les effectifs dans les noms de modalités")
+print("noponder = effectifs non-pondérés dans les noms de modalités")
 print("")
-print("MAJ : 04/04/2025")
-print("")
-print("Remplace l'option chi2_test, par use_test : pour choisir le test du chi2 ou le test de fisher")
-print("Correction Chi² pondérés selon Rao-Scott")
-print("Ajout de exclude : pour ne pas tenir compte de certaines modalités, par ex : 99, 88")
-print("Ajout de la table 'mix' : équivalent du proc format list de SAS : pour les combinaisons de modalités issues de différentes variables")
-print("Correction des pourcentages pour la ligne Ensemble des pourcentages lignes")
+print("2) use_test : possibilité d'utiliser des données pondérées pour le test de Fisher")
 print("")
 print("Pour plus d'info : https://github.com/arnomuller/Fonction_R/tree/main/table_auto")
 print("En cas de soucis, vous pouvez me contacter : arno.muller@ined.fr")
@@ -46,7 +45,7 @@ table_auto <- function(data,                    # Un data.frame
                        arrondi        = 2,      # Nombre de chiffres après la virgule
                        use_labels     = "no",   # Utiliser les labels : "no", "yes", "both"
                        add_blank_rows = TRUE,   # TRUE/FALSE : Ajout d'une ligne vide entre les variables
-                       eff_in_name    = TRUE,   # TRUE/FALSE : Ajout des effectifs dans les noms des modalités
+                       eff_in_name    = "no",   # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
                        excel_export   = FALSE,  # TRUE/FALSE : Création d'un fichier excel et son chemin
                        excel_filepath = "./table_auto.xlsx", # Chemin vers le fichier excel
                        view_html      = TRUE){
@@ -82,6 +81,11 @@ table_auto <- function(data,                    # Un data.frame
     stop("Erreur : use_labels doit être 'no', 'yes', ou 'both' ")
   }
   
+  # Vérification de parametre eff_in_name
+  if (eff_in_name != "no" && eff_in_name != "yes" && eff_in_name != "noponder") {
+    stop("Erreur : eff_in_name doit être 'no', 'yes', ou 'noponder'")
+  }
+  
   # Vérification du parametre use_test
   if (use_test != "chi2" && use_test != "fisher" && use_test != "chi2_noponder" && use_test != "no") {
     stop("Erreur : use_test doit être 'chi2', 'fisher', 'chi2_noponder' ou 'no' ")
@@ -97,11 +101,6 @@ table_auto <- function(data,                    # Un data.frame
   # Vérification de parametre add_blank_rows
   if (add_blank_rows != TRUE && add_blank_rows != FALSE) {
     stop("Erreur : add_blank_rows doit être TRUE ou FALSE")
-  }
-  
-  # Vérification de parametre eff_in_name
-  if (eff_in_name != TRUE && eff_in_name != FALSE) {
-    stop("Erreur : eff_in_name doit être TRUE ou FALSE")
   }
   
   # Vérification de parametre excel_export
@@ -175,13 +174,14 @@ table_auto <- function(data,                    # Un data.frame
     
     tabuni <- dt %>% 
       group_by(get(vars[i])) %>% 
-      summarise(ENSEMBLE = round(sum(ponderation),arrondi)) %>% 
+      summarise(ENSEMBLE = round(sum(ponderation),arrondi),
+                ENSEMBLE_noPonder = n()) %>% 
       rename(Levels = 1) %>% 
       mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
              Levels = factor(Levels, 
                              levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq."))) %>% 
       mutate(Var = vars[i]) %>%  
-      select(Var,Levels,ENSEMBLE)
+      select(Var,Levels,ENSEMBLE,ENSEMBLE_noPonder)
     
     
     # Gestion des NA
@@ -343,9 +343,17 @@ Peut-être qu'un test de Fisher serait plus adapté")
           # Fisher 
         } else if (use_test == "fisher"){
           
-          tab_test = xtabs(~var1+var2,data=tempo)
+          tab_test = xtabs(ponderation~var1+var2,data=tempo)
+          #tab_test = xtabs(~var1+var2,data=tempo)
+          
           test = fisher.test(tab_test, simulate.p.value=TRUE)
-          message_test = "Le test de fisher est calculé sur des données non pondérées"
+          
+          if(is.null(var_weight) == T){
+            message_test = "Le test de fisher est calculé sur des données non pondérées"
+          } else {
+            message_test = "Le test de fisher est calculé sur des données pondérées"
+          }
+          
           
           # Chi2 non pondéré sur n'importe quelles données  
         } else if (use_test == "chi2_noponder"){
@@ -510,7 +518,8 @@ Peut-être qu'un test de Fisher serait plus adapté")
   
   ###### UNIVAR 
   first_row <- dt %>% mutate(ponderation = ponder_calc) %>% 
-    summarise(ENSEMBLE = round(sum(ponderation),arrondi)) %>% 
+    summarise(ENSEMBLE = round(sum(ponderation),arrondi),
+              ENSEMBLE_noPonder = n()) %>% 
     mutate(Freq = 100,
            FreqCum = 100) %>% 
     mutate(Var =" ",
@@ -527,7 +536,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
       rename(Total = ENSEMBLE)
   }
   
-  assign("table_auto_univar", desc_uni, envir = .GlobalEnv)
+  assign("table_auto_univar", select(desc_uni,-ENSEMBLE_noPonder), envir = .GlobalEnv)
   
   
   ###### BIVAR 
@@ -568,7 +577,13 @@ Peut-être qu'un test de Fisher serait plus adapté")
         desc_bi_eff <- first_row %>% rbind(NA) %>% bind_rows(desc_bi_eff)  
       }
       
-      if(eff_in_name == TRUE){
+      
+      
+      
+      
+      
+      
+      if(eff_in_name == "yes"){
         
         desc_bi_eff <- desc_bi_eff %>% 
           bind_cols(select(desc_uni,Total)) %>% 
@@ -577,7 +592,22 @@ Peut-être qu'un test de Fisher serait plus adapté")
                                   paste0(Levels," (n = ",Total,")"))) %>% 
           select(-Total)
         
+      } else if(eff_in_name == "noponder") {
+        
+        desc_bi_eff <- desc_bi_eff %>% 
+          bind_cols(select(desc_uni,ENSEMBLE_noPonder)) %>% 
+          mutate(Levels = if_else(is.na(Levels),
+                                  NA,
+                                  paste0(Levels," (n = ",ENSEMBLE_noPonder,")"))) %>% 
+          select(-ENSEMBLE_noPonder)
+        
       }
+      
+      
+      
+      
+      
+      
       
       # Enregistrer le data.frame dans l'environnement global
       assign("table_auto_eff", desc_bi_eff, envir = .GlobalEnv)
@@ -623,14 +653,33 @@ Peut-être qu'un test de Fisher serait plus adapté")
         desc_bi_row <- first_row %>% rbind(NA) %>% bind_rows(desc_bi_row)  
       } 
       
-      if(eff_in_name == TRUE){
+      
+      
+      
+      if(eff_in_name == "yes"){
+        
         desc_bi_row <- desc_bi_row %>% 
           bind_cols(select(desc_uni,Total)) %>% 
           mutate(Levels = if_else(is.na(Levels),
                                   NA,
                                   paste0(Levels," (n = ",Total,")"))) %>% 
           select(-Total)
+        
+      } else if(eff_in_name == "noponder") {
+        
+        desc_bi_row <- desc_bi_row %>% 
+          bind_cols(select(desc_uni,ENSEMBLE_noPonder)) %>% 
+          mutate(Levels = if_else(is.na(Levels),
+                                  NA,
+                                  paste0(Levels," (n = ",ENSEMBLE_noPonder,")"))) %>% 
+          select(-ENSEMBLE_noPonder)
+        
       }
+      
+      
+      
+      
+      
       # Enregistrer le data.frame dans l'environnement global
       assign("table_auto_row", desc_bi_row, envir = .GlobalEnv)
     }
@@ -672,7 +721,9 @@ Peut-être qu'un test de Fisher serait plus adapté")
       
       
       
-      if(eff_in_name == TRUE){
+      
+      
+      if(eff_in_name == "yes"){
         
         desc_bi_col <- desc_bi_col %>% 
           bind_cols(select(desc_uni,Total)) %>% 
@@ -681,7 +732,20 @@ Peut-être qu'un test de Fisher serait plus adapté")
                                   paste0(Levels," (n = ",Total,")"))) %>% 
           select(-Total)
         
+      } else if(eff_in_name == "noponder") {
+        
+        desc_bi_col <- desc_bi_col %>% 
+          bind_cols(select(desc_uni,ENSEMBLE_noPonder)) %>% 
+          mutate(Levels = if_else(is.na(Levels),
+                                  NA,
+                                  paste0(Levels," (n = ",ENSEMBLE_noPonder,")"))) %>% 
+          select(-ENSEMBLE_noPonder)
+        
       }
+      
+      
+      
+      
       
       # Enregistrer le data.frame dans l'environnement global
       assign("table_auto_col", desc_bi_col, envir = .GlobalEnv)
@@ -744,10 +808,10 @@ Peut-être qu'un test de Fisher serait plus adapté")
   # C'est le message du Chi²
   
   if(is.null(var_col) == FALSE){
-   print(message_test)
+    print(message_test)
   }
   
-
+  
   
   
   ### EXPORT                 ----
