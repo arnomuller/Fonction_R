@@ -78,6 +78,7 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 - "no"        : n'affiche pas les effectifs   
 - "yes"       : affiche les effectifs   
 - "noponder"  : affiche les effectifs non-pondérés     
+
 **excel_export**   : TRUE ou FALSE, création d'un fichier excel.        
 **excel_filepath** : Chemin et nom du fichier excel (défaut : "table_auto.xlsx")    
 **view_html**      : TRUE ou FALSE, affiche la table choisie dans table_type en HTML       
