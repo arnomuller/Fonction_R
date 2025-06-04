@@ -139,7 +139,7 @@ table_auto(hdv2003,                    # Base de données
            arrondi        = 2,         # Nombre de chiffres après la virgule
            use_labels     = "no",      # Utiliser les labels : "no", "yes", "both"
            add_blank_rows = TRUE,      # TRUE/FALSE : Ajout d'une ligne vide entre les variables
-           eff_in_name    = TRUE,      # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
+           eff_in_name    = "yes",     # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
            excel_export   = FALSE,     # TRUE/FALSE : Création d'un fichier excel puis son chemin
            excel_filepath = "./table_auto.xlsx", # Seulement si excel_export = TRUE
            view_html      = TRUE)      # TRUE/FALSE : Afficher la table en HTML
