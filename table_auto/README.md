@@ -1,6 +1,6 @@
 # Introduction
 
-Il existe un large éventail de package R consacrés à la gestion et la mise en forme de table et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de bonne qualité, leur coût d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
+Il existe un large éventail de packages R consacrés à la gestion et la mise en forme de tables et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de bonne qualité, leurs coûts d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
 
 table_auto() se veut une fonction facile d'utilisation permettant de compiler des tris uni- ou bivariées sur un grand nombre de variables, d'utiliser une pondération et les exporter dans un document Excel.
 
@@ -29,7 +29,7 @@ data("hdv2003")
 -   Utiliser des pondérations (et les normaliser si besoin)  
 -   Garder ou non les valeurs manquantes  
 -   Exclure des modalités choisies  
--	Obtenir les résultats d'un test (chi², ou fisher)  
+-	Obtenir les résultats d'un test (chi² ou fisher)  
 -	Conserver les labels pour les données issues de SAS  
 -	Afficher la table en HTML  
 -   Exporter le tableau obtenu au format .xlsx  
@@ -67,7 +67,7 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 -	Chi² non pondéré : "chi2_noponder"  
 -	Fisher 			 : "fisher"  
 
-**arrondi**        : Nombre de chiffre après la virgule      
+**arrondi**        : Nombre de chiffres après la virgule      
 **use_labels**     : Utiliser les labels :    
 - "no"    : n'affiche pas les labels   
 - "yes"   : utilise les labels si présents   
@@ -134,7 +134,7 @@ table_auto(hdv2003,                    # Base de données
            var_weight     = "poids",   # Variable de pondération, sinon = NULL
            weight_norm    = FALSE,     # TRUE/FALSE : Normaliser la pondération
            useNA          = FALSE,     # TRUE/FALSE : Ajout des valeurs manquantes
-           exclude        = junk,      # exclure des modalités
+           exclude        = junk,      # Exclure des modalités
            use_test       = "chi2",    # Type de test : "chi2", "fisher", "chi2_noponder", "no"
            arrondi        = 2,         # Nombre de chiffres après la virgule
            use_labels     = "no",      # Utiliser les labels : "no", "yes", "both"
