@@ -19,6 +19,10 @@ data("hdv2003")
 mes_vars <- colnames(hdv2003)[10:19]
 mes_vars
 
+# Pour vars_num : 
+# Un vecteur avec les noms des variables nuémriques d'intérêts
+vars_num  <- c("age","heures.tv")
+
 # On peut définir des modalités qui ne doivent pas être utilisées
 # Exemple avec une modalité
 junk = c("NSP ou NVPR") 
@@ -28,19 +32,35 @@ junk = c("NSP ou NVPR", "Cadre", "Rejet")
 
 ## Utilisation de la fonction 
 
-table_auto(hdv2003,                    # Base de données
-           mes_vars,                   # Un vecteur avec les noms des variables d'intérêts
-           var_col        = "qualif",  # Variable à croiser avec celles du vecteur
-           table_type     = "all",     # Type de table : "all", "eff", "row", "col", ou "mix"
-           var_weight     = "poids",   # Variable de pondération, sinon = NULL
-           weight_norm    = FALSE,     # TRUE/FALSE : Normaliser la pondération
-           useNA          = FALSE,     # TRUE/FALSE : Ajout des valeurs manquantes
-           exclude        = junk,      # exclure des modalités
-           use_test       = "chi2",    # Type de test : "chi2", "fisher", "chi2_noponder", "no"
-           arrondi        = 2,         # Nombre de chiffres après la virgule
-           use_labels     = "no",      # Utiliser les labels : "no", "yes", "both"
-           add_blank_rows = TRUE,      # TRUE/FALSE : Ajout d'une ligne vide entre les variables
-           eff_in_name    = "yes",     # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
-           excel_export   = FALSE,     # TRUE/FALSE : Création d'un fichier excel puis son chemin
+table_auto(hdv2003,                     # Base de données
+           vars           = mes_vars,   # Un vecteur avec les noms des variables d'intérêts
+           vars_num       = vars_num,   # Un vecteur avec les noms des variables d'intérêts numériques
+           var_col        = "qualif",   # Variable à croiser avec celles du vecteur
+           table_type     = "all",      # Type de table : "all", "eff", "row", "col", ou "mix"
+           var_weight     = "poids",    # Variable de pondération, sinon = NULL
+           weight_norm    = FALSE,      # TRUE/FALSE : Normaliser la pondération
+           useNA          = FALSE,      # TRUE/FALSE : Ajout des valeurs manquantes
+           exclude        = junk,       # exclure des modalités
+           use_test       = "chi2",     # Type de test : "chi2", "fisher", "chi2_noponder", "no"
+           arrondi        = 2,          # Nombre de chiffres après la virgule
+           use_labels     = "no",       # Utiliser les labels : "no", "yes", "both"
+           add_blank_rows = TRUE,       # TRUE/FALSE : Ajout d'une ligne vide entre les variables
+           eff_in_name    = "noponder", # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
+           excel_export   = FALSE,      # TRUE/FALSE : Création d'un fichier excel puis son chemin
            excel_filepath = "./table_auto.xlsx", # Seulement si excel_export = TRUE
-           view_html      = TRUE)      # TRUE/FALSE : Afficher la table en HTML
+           view_html      = TRUE)       # TRUE/FALSE : Afficher la table en HTML
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

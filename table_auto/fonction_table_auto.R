@@ -2,7 +2,6 @@
 ####   FONCTION table_auto()    ####
 ####################################
 
-
 ## PACKAGES ----
 
 # library(tidyverse)
@@ -10,23 +9,15 @@
 # library(haven)
 # library(gt)
 # library(survey)
-
+# library(srvyr)
 
 ## MESSAGES ----
 
 print("DERNIERES MÀJ : ")
-
-print("MAJ : 13/05/2025")
+print("MAJ : 24/07/2025")
 print("")
-print("1) CHANGEMENT option : eff_in_name")
-print("yes = effectifs dans les noms de modalités")
-print("no = pas les effectifs dans les noms de modalités")
-print("noponder = effectifs non-pondérés dans les noms de modalités")
-print("")
-print("2) use_test : possibilité d'utiliser des données pondérées pour le test de Fisher")
-print("")
-print("Pour plus d'info : https://github.com/arnomuller/Fonction_R/tree/main/table_auto")
-print("En cas de soucis, vous pouvez me contacter : arno.muller@ined.fr")
+print("Ajout de vars_num :")
+print("Quelques indicateurs pour les variables numériques")
 
 
 ## FONCTION ----
@@ -34,7 +25,8 @@ print("En cas de soucis, vous pouvez me contacter : arno.muller@ined.fr")
 # Lancer la fonction suivante pour pourvoir l'appeler dans vos prochains scripts :
 
 table_auto <- function(data,                    # Un data.frame
-                       vars,                    # Un vecteur avec les noms des variables d'intérêts
+                       vars           = NULL,   # Un vecteur avec les noms des variables d'intérêts
+                       vars_num       = NULL,   # Un vecteur avec les noms des variables d'intérêts numériques
                        var_col        = NULL,   # Variable à croiser avec celles du vecteur
                        var_weight     = NULL,   # Variable de pondération, sinon = NULL
                        weight_norm    = FALSE,  # Normaliser la pondération
@@ -50,13 +42,18 @@ table_auto <- function(data,                    # Un data.frame
                        excel_filepath = "./table_auto.xlsx", # Chemin vers le fichier excel
                        view_html      = TRUE){
   
+  #############################
+  
+  
+  
+  #############################
   ### OPTIONS                ----
   # Ecriture scientifique
   options(scipen=9999)
   
   ### GESTION LIBRARY        ----
   # Liste des packages à charger
-  packages <- c("tidyverse", "openxlsx", "haven", "gt", "survey")
+  packages <- c("tidyverse", "openxlsx", "haven", "gt", "survey", "srvyr")
   # Vérifier si les packages sont déjà installés
   missing_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
   # Installer les packages manquants
@@ -67,8 +64,11 @@ table_auto <- function(data,                    # Un data.frame
   # Charger les packages
   lapply(packages, require, character.only = TRUE)
   
+  #############################
   
   
+  
+  #############################
   ### GESTION DES ERREURS    ----
   
   # Vérification du parametre table_type
@@ -91,12 +91,10 @@ table_auto <- function(data,                    # Un data.frame
     stop("Erreur : use_test doit être 'chi2', 'fisher', 'chi2_noponder' ou 'no' ")
   }
   
-  
   # Vérification de parametre useNA
   if (useNA != TRUE && useNA != FALSE) {
     stop("Erreur : useNA doit être TRUE ou FALSE")
   }
-  
   
   # Vérification de parametre add_blank_rows
   if (add_blank_rows != TRUE && add_blank_rows != FALSE) {
@@ -113,9 +111,30 @@ table_auto <- function(data,                    # Un data.frame
     stop("Erreur : weight_norm doit être TRUE ou FALSE")
   }
   
+  # Vérification que les variables numériques 
+  if(is.null(vars_num) == F){
+    # Gestion des variables pas numériques
+    tryCatch(                
+      expr = {                      
+        data2 = data |> 
+          mutate(across(matches(vars_num), as.character)) |> 
+          mutate(across(matches(vars_num), as.numeric))
+      },
+      warning = function(w){       
+        print("Attention : dans vars_num, des modalités ne sont pas numériques")
+      }
+    )
+    # On passe en numérique
+    data = data |> 
+      mutate(across(matches(vars_num), as.character)) |> 
+      mutate(across(matches(vars_num), as.numeric))
+  } # Fin vérif' numerique
+  #############################
   
+  
+  
+  #############################
   ### GESTION DES PARAMETRES ----
-  
   
   # Variable pondération : ----
   if(is.null(var_weight) == T){
@@ -128,20 +147,26 @@ table_auto <- function(data,                    # Un data.frame
   
   
   # Données et labels:     ----
-  
-  if (use_labels == "no") {
+  if (use_labels == "no") { 
     dt <- data %>% 
       mutate(ponderation = ponder_calc) %>% 
       select(any_of(c(vars,var_col)),ponderation) %>% 
       mutate(across(!matches("ponderation"), as.factor))
+    dt_num <- data %>% 
+      mutate(ponderation = ponder_calc) %>% 
+      select(any_of(c(vars_num,var_col)),ponderation) %>% 
+      mutate(across(!matches(c("ponderation", vars_num)), as.factor))
   } else if (use_labels == "yes"){
     dt <- data %>% 
       mutate(ponderation = ponder_calc) %>% 
       select(any_of(c(vars,var_col)),ponderation) %>% 
       mutate(across(where(~ !is.null(attr(.x, "labels"))), haven::as_factor)) %>% 
       mutate(across(where(~ is.null(attr(.x, "labels"))) & !matches("ponderation"), as.factor))
-    
-    
+    dt_num <- data %>% 
+      mutate(ponderation = ponder_calc) %>% 
+      select(any_of(c(vars_num,var_col)),ponderation) %>% 
+      mutate(across(where(~ !is.null(attr(.x, "labels"))), haven::as_factor)) %>% 
+      mutate(across(where(~ is.null(attr(.x, "labels"))) & !matches(c("ponderation", vars_num)), as.factor))
   } else if (use_labels == "both"){
     dt <- data %>% 
       mutate(ponderation = ponder_calc) %>% 
@@ -151,12 +176,130 @@ table_auto <- function(data,                    # Un data.frame
         is.null(attributes(.)$labels) ~ as.factor(.),
         TRUE ~ paste0(as.factor(.)," : ",as_factor(.)))
       ))
+    dt_num <- data %>% 
+      mutate(ponderation = ponder_calc) %>% 
+      select(any_of(c(vars_num,var_col)),ponderation) %>% 
+      mutate(across(!matches(c("ponderation", vars_num)), ~case_when(
+        is.na(.) ~ NA,
+        is.null(attributes(.)$labels) ~ as.factor(.),
+        TRUE ~ paste0(as.factor(.)," : ",as_factor(.)))
+      ))
   }
+  #############################
   
   
   
+  #############################
+  ### VARIABLES NUMERIQUES ----
+  
+  # Si pas de variables num
+  if(is.null(vars_num) == F){
+    
+    # Renomme la variable de colonne
+    dt_num <- dt_num                        |> 
+      select(all_of(var_col), everything()) |> 
+      rename(Groupe = 1) 
+    
+    
+    
+    ###########
+    ## UNIVAR               ----
+    desc_uni_num = dt_num |>
+      pivot_longer(all_of(vars_num),
+                   names_to = "Var",
+                   values_to = "values") |> 
+      as_survey(ids = 1, weights = ponderation) |> 
+      group_by(Var) |> 
+      summarise(Minimum   = round(min(values, na.rm = T), arrondi),
+                Moyenne   = round(survey_mean(values, na.rm = T, vartype = NULL), arrondi),
+                Quartile1 = round(survey_quantile(values,0.25, na.rm = T, vartype = NULL), arrondi) ,
+                Mediane   = round(survey_quantile(values,0.5, na.rm = T, vartype = NULL), arrondi)  ,
+                Quartile3 = round(survey_quantile(values,0.75, na.rm = T, vartype = NULL), arrondi) ,
+                Maximum   = round(max(values, na.rm = T), arrondi),
+                NbrNA     = round(sum(ponderation[is.na(values)]), arrondi)
+      )|> 
+      pivot_longer(2:8,
+                   names_to = "Levels",
+                   values_to = "ENSEMBLE") 
+    
+    # Ligne blanche
+    if(add_blank_rows == TRUE){
+      # Ajouter une ligne vide entre les groupes
+      desc_uni_num_split <- desc_uni_num %>%
+        group_split(Var)  # séparer les groupes
+      # Créer une ligne vide
+      empty_row <- desc_uni_num[1, ]
+      empty_row[] <- NA
+      # Ajouter une ligne vide entre chaque groupe
+      desc_uni_num <- do.call(rbind, lapply(desc_uni_num_split, function(group) {
+        rbind(group, empty_row)
+      }))
+    } # Fin Ligne blanche
+    
+    
+    
+    ###########
+    ## BIVAR                 ----
+    
+    if(is.null(var_col) == FALSE){
+      
+      # Gestion des NA
+      if(useNA == FALSE){
+        dt_num <- dt_num |> 
+          filter(Groupe != "Val.Manq." | is.na(Groupe) == TRUE )
+      }
+      # Exclure des modalités des calculs
+      if (is.null(exclude) == FALSE) {
+        dt_num <- dt_num |> 
+          filter(!Groupe %in% exclude)
+      }
+      
+      desc_bi_num = dt_num |>
+        pivot_longer(all_of(vars_num),
+                     names_to = "Var",
+                     values_to = "values") |> 
+        as_survey(ids = 1, weights = ponderation) |> 
+        group_by(Groupe,Var) |> 
+        summarise(Minimum   = round(min(values, na.rm = T), arrondi),
+                  Moyenne   = round(survey_mean(values, na.rm = T, vartype = NULL), arrondi),
+                  Quartile1 = round(survey_quantile(values,0.25, na.rm = T, vartype = NULL), arrondi) ,
+                  Mediane   = round(survey_quantile(values,0.5, na.rm = T, vartype = NULL), arrondi)  ,
+                  Quartile3 = round(survey_quantile(values,0.75, na.rm = T, vartype = NULL), arrondi) ,
+                  Maximum   = round(max(values, na.rm = T), arrondi),
+                  NbrNA     = round(sum(ponderation[is.na(values)]), arrondi)
+        )                  |> 
+        rename(Groupe = 1) |> 
+        pivot_longer(3:9,
+                     names_to = "Levels",
+                     values_to = "ENSEMBLE") |> 
+        pivot_wider(names_from = Groupe,
+                    values_from = ENSEMBLE)  |> 
+        left_join(filter(desc_uni_num, !is.na(Var)), by = c("Var","Levels"))
+      
+      # Ligne blanche
+      if(add_blank_rows == TRUE){
+        # Ajouter une ligne vide entre les groupes
+        desc_bi_num_split <- desc_bi_num %>%
+          group_split(Var)  # séparer les groupes
+        
+        # Créer une ligne vide
+        empty_row <- desc_bi_num[1, ]
+        empty_row[] <- NA
+        
+        # Ajouter une ligne vide entre chaque groupe
+        desc_bi_num <- do.call(rbind, lapply(desc_bi_num_split, function(group) {
+          rbind(group, empty_row)
+        }))
+      } # Fin Ligne blanche
+      
+    } # Fin Bivar
+  } # Fin numérique
+  
+  #############################
   
   
+  
+  #############################
   ### BOUCLES                ----
   
   
@@ -166,126 +309,199 @@ table_auto <- function(data,                    # Un data.frame
   desc_bi_row <- data.frame()
   desc_bi_col <- data.frame()
   
-  for (i in c(1:length(vars))) {
-    
-    # print(i)
-    
-    ### Création du tri à plat  ----
-    
-    tabuni <- dt %>% 
-      group_by(get(vars[i])) %>% 
-      summarise(ENSEMBLE = round(sum(ponderation),arrondi),
-                ENSEMBLE_noPonder = n()) %>% 
-      rename(Levels = 1) %>% 
-      mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
-             Levels = factor(Levels, 
-                             levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq."))) %>% 
-      mutate(Var = vars[i]) %>%  
-      select(Var,Levels,ENSEMBLE,ENSEMBLE_noPonder)
-    
-    
-    # Gestion des NA
-    if(useNA == FALSE){
-      tabuni <- tabuni %>% 
-        filter(Levels != "Val.Manq." | is.na(Levels) == TRUE )
-    }
-    
-    # Exclure des modalités des calculs
-    if (is.null(exclude) == FALSE) {
-      tabuni <- tabuni |> 
-        filter(!Levels %in% exclude)
-    }
-    
-    
-    tabuni = tabuni %>% 
-      mutate(Freq = (ENSEMBLE*100)/sum(ENSEMBLE),
-             FreqCum = cumsum(Freq)) |>  
-      mutate(Freq = round(Freq,arrondi),
-             FreqCum = round(FreqCum,arrondi)) 
-    
-    desc_uni <- rbind(desc_uni,tabuni)
-    
-    
-    # Ajout de ligne blanche entre les variables
-    if(add_blank_rows == TRUE){
-      desc_uni <- rbind(desc_uni, rep(NA, ncol(desc_uni)))
-    }
-    
-    
-    ### Création tri croisé si var_col
-    if(is.null(var_col) == FALSE){
+  
+  if(is.null(vars) == FALSE){
+    for (i in c(1:length(vars))) {
+      ##################
       
       
-      # La table initale : ----
+      ##################
+      ### Création du tri à plat  ----
       
-      tab_commune <- dt %>% 
-        group_by(get(var_col),get(vars[i])) %>% 
-        summarise(ENSEMBLE = sum(ponderation), .groups = "drop") %>% 
-        rename(Groupe = 1,
-               Levels = 2) %>% 
+      tabuni <- dt %>% 
+        group_by(get(vars[i])) %>% 
+        summarise(ENSEMBLE = round(sum(ponderation),arrondi),
+                  ENSEMBLE_noPonder = n()) %>% 
+        rename(Levels = 1) %>% 
         mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
-               Groupe = if_else(is.na(Groupe), "Val.Manq.", Groupe)) %>% 
-        complete(Groupe, Levels, fill = list(ENSEMBLE = 0)) %>% 
-        mutate(Levels = factor(Levels, levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq.")),
-               Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq."))) %>% 
-        arrange(Groupe,Levels)
+               Levels = factor(Levels, 
+                               levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq."))) %>% 
+        mutate(Var = vars[i]) %>%  
+        select(Var,Levels,ENSEMBLE,ENSEMBLE_noPonder)
       
       
       # Gestion des NA
       if(useNA == FALSE){
-        tab_commune <- tab_commune %>% 
-          filter(Levels != "Val.Manq."| is.na(Levels) == TRUE) %>% 
-          filter(Groupe != "Val.Manq."| is.na(Groupe) == TRUE)
-      }
+        tabuni <- tabuni %>% 
+          filter(Levels != "Val.Manq." | is.na(Levels) == TRUE )
+      } # Fin NA
       
       # Exclure des modalités des calculs
       if (is.null(exclude) == FALSE) {
-        tab_commune <- tab_commune |> 
-          filter(!Levels %in% exclude) |> 
-          filter(!Groupe %in% exclude)
-      }
+        tabuni <- tabuni |> 
+          filter(!Levels %in% exclude)
+      } # Fin exclude
       
       
+      tabuni = tabuni %>% 
+        mutate(Freq = (ENSEMBLE*100)/sum(ENSEMBLE),
+               FreqCum = cumsum(Freq)) |>  
+        mutate(Freq = round(Freq,arrondi),
+               FreqCum = round(FreqCum,arrondi)) 
+      
+      desc_uni <- rbind(desc_uni,tabuni)
       
       
+      # Ajout de ligne blanche entre les variables
+      if(add_blank_rows == TRUE){
+        desc_uni <- rbind(desc_uni, rep(NA, ncol(desc_uni)))
+      } # Fin ligne blanche
+      ##################
       
-      ##### Test de significativité  ------------
       
-      if(use_test != "no") {
+      ##################
+      ### Création tri croisé si var_col
+      if(is.null(var_col) == FALSE){
+        
+        ##################
+        # La table initale : ----
+        
+        tab_commune <- dt %>% 
+          group_by(get(var_col),get(vars[i])) %>% 
+          summarise(ENSEMBLE = sum(ponderation), .groups = "drop") %>% 
+          rename(Groupe = 1,
+                 Levels = 2) %>% 
+          mutate(Levels = if_else(is.na(Levels), "Val.Manq.", Levels),
+                 Groupe = if_else(is.na(Groupe), "Val.Manq.", Groupe)) %>% 
+          complete(Groupe, Levels, fill = list(ENSEMBLE = 0)) %>% 
+          mutate(Levels = factor(Levels, levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq.")),
+                 Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq."))) %>% 
+          arrange(Groupe,Levels)
         
         
-        tempo = dt |> 
-          select(ponderation, vars[i], all_of(var_col)) |> 
-          mutate(var1 = as.character(get(vars[i])),
-                 var1 = if_else(is.na(var1), "Val.Manq.", var1),
-                 var2 = as.character(get(var_col)),
-                 var2 = if_else(is.na(var2), "Val.Manq.", var2)) 
         # Gestion des NA
         if(useNA == FALSE){
-          tempo <- tempo %>% 
-            filter(var1 != "Val.Manq."| is.na(var1) == TRUE) %>% 
-            filter(var2 != "Val.Manq."| is.na(var2) == TRUE)
+          tab_commune <- tab_commune %>% 
+            filter(Levels != "Val.Manq."| is.na(Levels) == TRUE) %>% 
+            filter(Groupe != "Val.Manq."| is.na(Groupe) == TRUE)
         }
+        
         # Exclure des modalités des calculs
         if (is.null(exclude) == FALSE) {
-          tempo <- tempo |> 
-            filter(!var1 %in% exclude) |> 
-            filter(!var2 %in% exclude)
+          tab_commune <- tab_commune |> 
+            filter(!Levels %in% exclude) |> 
+            filter(!Groupe %in% exclude)
         }
         
         
-        # Chi2 
-        if(use_test == "chi2") {
+        ##################
+        # Test de significativité  -----
+        
+        if(use_test != "no") {
           
-          # Chi2 non pondéré
-          if(is.null(var_weight) == T){
+          tempo = dt |> 
+            select(ponderation, vars[i], all_of(var_col)) |> 
+            mutate(var1 = as.character(get(vars[i])),
+                   var1 = if_else(is.na(var1), "Val.Manq.", var1),
+                   var2 = as.character(get(var_col)),
+                   var2 = if_else(is.na(var2), "Val.Manq.", var2)) 
+          # Gestion des NA
+          if(useNA == FALSE){
+            tempo <- tempo %>% 
+              filter(var1 != "Val.Manq."| is.na(var1) == TRUE) %>% 
+              filter(var2 != "Val.Manq."| is.na(var2) == TRUE)
+          }
+          # Exclure des modalités des calculs
+          if (is.null(exclude) == FALSE) {
+            tempo <- tempo |> 
+              filter(!var1 %in% exclude) |> 
+              filter(!var2 %in% exclude)
+          }
+          
+          # Chi2 
+          if(use_test == "chi2") {
+            
+            # Chi2 non pondéré
+            if(is.null(var_weight) == T){
+              
+              tab_test = xtabs(~var1+var2,data=tempo)
+              test = chisq.test(tab_test)
+              ddl = test$parameter
+              pvalue = round(test$p.value,3)
+              
+              # Warning si Pct > 20
+              warning = as.data.frame(test$expected) |> 
+                pivot_longer(1:ncol(test$expected))  |> 
+                mutate(n5 = ifelse(value <= 5, 1,0),
+                       n5 = ifelse(value < 1, 1000,n5))|> 
+                summarise(
+                  Eff = sum(n5),
+                  Pct = sum(n5)*100/n())
+              
+              message_test = "Test du Chi²"
+              
+              # Chi2 pondéré
+            } else {
+              
+              tab_test  = survey::svydesign(id = ~ 1, weights = tempo$ponderation, data = tempo )
+              
+              #test = survey::svychisq(~ var1 + var2, tab_test, statistic="F")
+              
+              test = tryCatch({
+                svychisq(~ var1 + var2, tab_test, statistic="F")
+              },error = function(e) {
+                message("ATTENTION : les chi2 ne sont pas calculés : des cases doivent avoir trop peu d'effectifs.
+Peut-être qu'un test de Fisher serait plus adapté")
+                NA  # Returning NULL in case of an error in outlier detection
+              })
+              
+              if(length(test) < 2){
+                warning = data.frame(
+                  Eff = 9999,
+                  Pct = 100
+                )
+                ddl = NA
+                pvalue = NA
+                
+              } else{
+                warning = as.data.frame(test$expected) |> 
+                  pivot_longer(1:ncol(test$expected))  |> 
+                  mutate(n5 = ifelse(value <= 5, 1,0),
+                         n5 = ifelse(value < 1, 1000,n5)) |> 
+                  summarise(Eff = sum(n5),
+                            Pct = sum(n5)*100/n())
+                
+                ddl = round(test$parameter[1],1)
+                pvalue = round(test$p.value,3)
+              }
+              
+              # Save message 
+              message_test = "Chi2 pondéré avec correction de Rao-Scott"
+              
+            }
+            
+            # Fisher 
+          } else if (use_test == "fisher"){
+            
+            tab_test = xtabs(ponderation~var1+var2,data=tempo)
+            #tab_test = xtabs(~var1+var2,data=tempo)
+            
+            test = fisher.test(tab_test, simulate.p.value=TRUE)
+            
+            if(is.null(var_weight) == T){
+              message_test = "Le test de fisher est calculé sur des données non pondérées"
+            } else {
+              message_test = "Le test de fisher est calculé sur des données pondérées"
+            }
+            
+            # Chi2 non pondéré sur n'importe quelles données  
+          } else if (use_test == "chi2_noponder"){
             
             tab_test = xtabs(~var1+var2,data=tempo)
             test = chisq.test(tab_test)
             ddl = test$parameter
             pvalue = round(test$p.value,3)
             
-            # Warning si Pct > 20
             warning = as.data.frame(test$expected) |> 
               pivot_longer(1:ncol(test$expected))  |> 
               mutate(n5 = ifelse(value <= 5, 1,0),
@@ -294,229 +510,141 @@ table_auto <- function(data,                    # Un data.frame
                 Eff = sum(n5),
                 Pct = sum(n5)*100/n())
             
-            message_test = "Test du Chi²"
+            message_test = "Le Chi2 a été calculé sur des données non pondérées"
+          }
+        } else {
+          
+          message_test = "Pas de test"
+          
+        } # Fin Test
+        ##################
+        
+        
+        ##################
+        ### EFFECTIF
+        if(table_type %in% c("eff","all")){
+          tab_eff <- tab_commune %>% 
+            mutate(ENSEMBLE = round(ENSEMBLE,arrondi)) |> 
+            pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
+            mutate(Var = vars[i]) %>%  
+            select(Var,Levels,everything()) %>% 
+            left_join(select(desc_uni, Var,Levels, ENSEMBLE), by = c("Var","Levels"))
+          
+          # Variables du Chi²
+          if(use_test %in% c("chi2", "chi2_noponder")){
+            tab_eff <- tab_eff %>% mutate(
+              chi2_pvalue = pvalue,
+              chi2_ddl = ddl,
+              chi2_warn = "OK")
+            # S'il y a un warning dans chisq.test
+            if (warning$Pct > 20) { tab_eff <- tab_eff %>% mutate(chi2_warn = "Pas_OK")}
             
+          } else if(use_test == "fisher"){
+            tab_eff <- tab_eff %>% mutate(fisher_pvalue = round(test$p.value,3))
+          }
+          
+          # On ajoute la boucle à la table générale
+          desc_bi_eff <- rbind(desc_bi_eff,tab_eff)
+          
+          # Ajout de ligne blanche entre les variables
+          if(add_blank_rows == TRUE){
+            desc_bi_eff <- rbind(desc_bi_eff, rep(NA, ncol(desc_bi_eff)))
+          } # Fin Ligne blanche
+          
+        } # FIN eff
+        ##################
+        
+        
+        ##################
+        ### LIGNES
+        if(table_type %in% c("row","all")){
+          
+          tab_row <- tab_commune |> 
+            # Pourcentage Row
+            group_by(Levels) %>% 
+            mutate(Value = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
+            mutate(ENSEMBLE = sum(Value)) |> 
+            pivot_wider(names_from = Groupe, values_from = Value)  %>% 
+            mutate(Var = vars[i]) %>%  
+            select(Var,Levels,everything()) %>%  
+            relocate(ENSEMBLE, .after = last_col()) %>% 
+            ungroup()
+          
+          # Variables du Chi²
+          if(use_test %in% c("chi2", "chi2_noponder")){
+            tab_row <- tab_row %>% mutate(
+              chi2_pvalue = pvalue,
+              chi2_ddl = ddl,
+              chi2_warn = "OK")
+            # S'il y a un warning dans chisq.test
+            if (warning$Pct > 20) { tab_row <- tab_row %>% mutate(chi2_warn = "Pas_OK")}
             
-            # Chi2 pondéré
-          } else {
-            
-            tab_test  = survey::svydesign(id = ~ 1, weights = tempo$ponderation, data = tempo )
-            
-            #test = survey::svychisq(~ var1 + var2, tab_test, statistic="F")
-            
-            test = tryCatch({
-              svychisq(~ var1 + var2, tab_test, statistic="F")
-            },error = function(e) {
-              message("ATTENTION : les chi2 ne sont pas calculés : des cases doivent avoir trop peu d'effectifs.
-Peut-être qu'un test de Fisher serait plus adapté")
-              NA  # Returning NULL in case of an error in outlier detection
-            })
-            
-            
-            
-            if(length(test) < 2){
-              warning = data.frame(
-                Eff = 9999,
-                Pct = 100
-              )
-              ddl = NA
-              pvalue = NA
-              
-            } else{
-              warning = as.data.frame(test$expected) |> 
-                pivot_longer(1:ncol(test$expected))  |> 
-                mutate(n5 = ifelse(value <= 5, 1,0),
-                       n5 = ifelse(value < 1, 1000,n5)) |> 
-                summarise(Eff = sum(n5),
-                          Pct = sum(n5)*100/n())
-              
-              ddl = round(test$parameter[1],1)
-              pvalue = round(test$p.value,3)
-            }
-            
-            
-            # Save message 
-            message_test = "Chi2 pondéré avec correction de Rao-Scott"
+          } else if(use_test == "fisher"){
+            tab_row <- tab_row %>% mutate(fisher_pvalue = round(test$p.value,3))
             
           }
           
-          # Fisher 
-        } else if (use_test == "fisher"){
+          # On ajoute la boucle à la table générale
+          desc_bi_row <- rbind(desc_bi_row,tab_row)
           
-          tab_test = xtabs(ponderation~var1+var2,data=tempo)
-          #tab_test = xtabs(~var1+var2,data=tempo)
+          # Ajout de ligne blanche entre les variables
+          if(add_blank_rows == TRUE){
+            desc_bi_row <- rbind(desc_bi_row, NA) # Test sans rep()
+          } # Fin Ligne blanche
           
-          test = fisher.test(tab_test, simulate.p.value=TRUE)
+        } # FIN row
+        ##################
+        
+        
+        ##################
+        if(table_type %in% c("col","all")){
           
-          if(is.null(var_weight) == T){
-            message_test = "Le test de fisher est calculé sur des données non pondérées"
-          } else {
-            message_test = "Le test de fisher est calculé sur des données pondérées"
+          tab_col <- tab_commune %>%
+            # Pourcentage Col
+            group_by(Groupe) %>% 
+            mutate(ENSEMBLE = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
+            pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
+            mutate(Var = vars[i]) %>%  
+            select(Var,Levels,everything()) %>% 
+            left_join(select(desc_uni, Var,Levels, Freq), by = c("Var","Levels")) %>% 
+            rename(ENSEMBLE=Freq) %>% 
+            ungroup()
+          
+          # Variables du Chi²
+          if(use_test %in% c("chi2", "chi2_noponder")){
+            tab_col <- tab_col %>% mutate(
+              chi2_pvalue = pvalue,
+              chi2_ddl = ddl,
+              chi2_warn = "OK")
+            # S'il y a un warning dans chisq.test
+            if (warning$Pct > 20) { tab_col <- tab_col %>% mutate(chi2_warn = "Pas_OK")}
+            
+          } else if(use_test == "fisher"){
+            tab_col <- tab_col %>% mutate(fisher_pvalue = round(test$p.value,3))
           }
           
+          # On ajoute la boucle à la table générale
+          desc_bi_col <- rbind(desc_bi_col,tab_col)
           
-          # Chi2 non pondéré sur n'importe quelles données  
-        } else if (use_test == "chi2_noponder"){
-          
-          tab_test = xtabs(~var1+var2,data=tempo)
-          test = chisq.test(tab_test)
-          ddl = test$parameter
-          pvalue = round(test$p.value,3)
-          
-          warning = as.data.frame(test$expected) |> 
-            pivot_longer(1:ncol(test$expected))  |> 
-            mutate(n5 = ifelse(value <= 5, 1,0),
-                   n5 = ifelse(value < 1, 1000,n5))|> 
-            summarise(
-              Eff = sum(n5),
-              Pct = sum(n5)*100/n())
-          
-          message_test = "Le Chi2 a été calculé sur des données non pondérées"
-          
-        }
-      } else {
-        
-        message_test = "Pas de test"
-        
-      } # Fin Test
-      
-      ##################
-      
-      
-      ### EFFECTIF
-      
-      if(table_type %in% c("eff","all")){
-        tab_eff <- tab_commune %>% 
-          mutate(ENSEMBLE = round(ENSEMBLE,arrondi)) |> 
-          pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
-          mutate(Var = vars[i]) %>%  
-          select(Var,Levels,everything()) %>% 
-          left_join(select(desc_uni, Var,Levels, ENSEMBLE), by = c("Var","Levels"))
-        
-        
-        
-        # Variables du Chi²
-        if(use_test %in% c("chi2", "chi2_noponder")){
-          tab_eff <- tab_eff %>% mutate(
-            chi2_pvalue = pvalue,
-            chi2_ddl = ddl,
-            chi2_warn = "OK")
-          # S'il y a un warning dans chisq.test
-          if (warning$Pct > 20) { tab_eff <- tab_eff %>% mutate(chi2_warn = "Pas_OK")}
-          
-        } else if(use_test == "fisher"){
-          tab_eff <- tab_eff %>% mutate(fisher_pvalue = round(test$p.value,3))
-        }
-        
-        
-        
-        
-        # On ajoute la boucle à la table générale
-        desc_bi_eff <- rbind(desc_bi_eff,tab_eff)
-        
-        # Ajout de ligne blanche entre les variables
-        if(add_blank_rows == TRUE){
-          desc_bi_eff <- rbind(desc_bi_eff, rep(NA, ncol(desc_bi_eff)))
-        } # Fin Ligne blanche
-        
-      } # FIN eff
-      
-      
-      ### LIGNES
-      if(table_type %in% c("row","all")){
-        
-        tab_row <- tab_commune |> 
-          # Pourcentage Row
-          group_by(Levels) %>% 
-          mutate(Value = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
-          mutate(ENSEMBLE = sum(Value)) |> 
-          pivot_wider(names_from = Groupe, values_from = Value)  %>% 
-          mutate(Var = vars[i]) %>%  
-          select(Var,Levels,everything()) %>%  
-          relocate(ENSEMBLE, .after = last_col()) %>% 
-          ungroup()
-        
-        
-        
-        # Variables du Chi²
-        if(use_test %in% c("chi2", "chi2_noponder")){
-          tab_row <- tab_row %>% mutate(
-            chi2_pvalue = pvalue,
-            chi2_ddl = ddl,
-            chi2_warn = "OK")
-          # S'il y a un warning dans chisq.test
-          if (warning$Pct > 20) { tab_row <- tab_row %>% mutate(chi2_warn = "Pas_OK")}
-          
-        } else if(use_test == "fisher"){
-          tab_row <- tab_row %>% mutate(fisher_pvalue = round(test$p.value,3))
-          
-        }
-        
-        
-        
-        
-        # On ajoute la boucle à la table générale
-        desc_bi_row <- rbind(desc_bi_row,tab_row)
-        
-        # Ajout de ligne blanche entre les variables
-        if(add_blank_rows == TRUE){
-          desc_bi_row <- rbind(desc_bi_row, NA) # Test sans rep()
-        } # Fin Ligne blanche
-        
-      } # FIN row
-      
-      
-      if(table_type %in% c("col","all")){
-        
-        tab_col <- tab_commune %>%
-          # Pourcentage Col
-          group_by(Groupe) %>% 
-          mutate(ENSEMBLE = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
-          pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
-          mutate(Var = vars[i]) %>%  
-          select(Var,Levels,everything()) %>% 
-          left_join(select(desc_uni, Var,Levels, Freq), by = c("Var","Levels")) %>% 
-          rename(ENSEMBLE=Freq) %>% 
-          ungroup()
-        
-        
-        
-        # Variables du Chi²
-        if(use_test %in% c("chi2", "chi2_noponder")){
-          tab_col <- tab_col %>% mutate(
-            chi2_pvalue = pvalue,
-            chi2_ddl = ddl,
-            chi2_warn = "OK")
-          # S'il y a un warning dans chisq.test
-          if (warning$Pct > 20) { tab_col <- tab_col %>% mutate(chi2_warn = "Pas_OK")}
-          
-        } else if(use_test == "fisher"){
-          tab_col <- tab_col %>% mutate(fisher_pvalue = round(test$p.value,3))
-          
-        }
-        
-        
-        
-        # On ajoute la boucle à la table générale
-        desc_bi_col <- rbind(desc_bi_col,tab_col)
-        
-        # Ajout de ligne blanche entre les variables
-        if(add_blank_rows == TRUE){
-          desc_bi_col <- rbind(desc_bi_col, rep(NA, ncol(desc_bi_col)))
-        } # Fin Ligne blanche
-        
-      } # FIN col
-      
-    } # Fin Var Croisé
-  } # Fin Boucle
+          # Ajout de ligne blanche entre les variables
+          if(add_blank_rows == TRUE){
+            desc_bi_col <- rbind(desc_bi_col, rep(NA, ncol(desc_bi_col)))
+          } # Fin Ligne blanche
+        } # FIN col
+      } # Fin Var Croisé
+    } # Fin Boucle
+  } # Fin if vars != NULL
+  #############################
   
   
   
-  ############################################
-  # AJOUT PREMIERE LIGNE ----
+  #############################
+  ### COMPILATIONS ----
   
+  ##############
+  # UNIVAR         ----
   
-  ###### UNIVAR 
+  # Première ligne
   first_row <- dt %>% mutate(ponderation = ponder_calc) %>% 
     summarise(ENSEMBLE = round(sum(ponderation),arrondi),
               ENSEMBLE_noPonder = n()) %>% 
@@ -525,24 +653,50 @@ Peut-être qu'un test de Fisher serait plus adapté")
     mutate(Var =" ",
            Levels = "ENSEMBLE") %>%  
     select(Var, Levels,everything())
+
   
   
+  
+  
+  ############## ENSEMBLE ou TOTAL ?
   
   if(add_blank_rows == FALSE){
-    desc_uni <- first_row %>% bind_rows(desc_uni) %>% 
-      rename(Total = ENSEMBLE) 
+    desc_uni <- first_row %>% bind_rows(desc_uni) # %>%  rename(Total = ENSEMBLE) 
   } else {
-    desc_uni <- first_row %>% rbind(NA) %>% bind_rows(desc_uni) %>% 
-      rename(Total = ENSEMBLE)
+    desc_uni <- first_row %>% rbind(NA) %>% bind_rows(desc_uni) # %>% rename(Total = ENSEMBLE)
   }
   
-  assign("table_auto_univar", select(desc_uni,-ENSEMBLE_noPonder), envir = .GlobalEnv)
+  
+  # Variables numériques
+  if(is.null(vars_num) == T){
+    desc_uni_vf = select(desc_uni,-ENSEMBLE_noPonder) 
+  } else {
+    desc_uni_vf = select(desc_uni,-ENSEMBLE_noPonder) |> 
+      bind_rows(desc_uni_num)
+  }
+  
+  assign("table_auto_univar", desc_uni_vf, envir = .GlobalEnv)
   
   
-  ###### BIVAR 
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  ##############
+  # BIVAR EFF        ----
+  
+  
+  # Si on a une variable en colonne
   if(is.null(var_col) == FALSE){
-    
+
     ### EFF
     if(table_type %in% c("eff","all")){
       
@@ -577,12 +731,8 @@ Peut-être qu'un test de Fisher serait plus adapté")
         desc_bi_eff <- first_row %>% rbind(NA) %>% bind_rows(desc_bi_eff)  
       }
       
-      
-      
-      
-      
-      
-      
+
+      ### Effectif dans les noms
       if(eff_in_name == "yes"){
         
         desc_bi_eff <- desc_bi_eff %>% 
@@ -603,17 +753,20 @@ Peut-être qu'un test de Fisher serait plus adapté")
         
       }
       
+      ### VAR NUMERIQUES  #############
       
+      # Si pas de variables num
+      if(is.null(vars_num) == F){
+        desc_bi_eff = desc_bi_eff |> 
+          bind_rows(desc_bi_num)
+      } # Fin numerique
       
-      
-      
-      
+      ##################
       
       # Enregistrer le data.frame dans l'environnement global
       assign("table_auto_eff", desc_bi_eff, envir = .GlobalEnv)
       
     }
-    
     
     
     
@@ -654,8 +807,6 @@ Peut-être qu'un test de Fisher serait plus adapté")
       } 
       
       
-      
-      
       if(eff_in_name == "yes"){
         
         desc_bi_row <- desc_bi_row %>% 
@@ -676,13 +827,23 @@ Peut-être qu'un test de Fisher serait plus adapté")
         
       }
       
+      ### VAR NUMERIQUES  #############
       
+      # Si pas de variables num
+      if(is.null(vars_num) == F){
+        desc_bi_row = desc_bi_row |> 
+          bind_rows(desc_bi_num)
+      } # Fin numerique
       
+      ##################
       
       
       # Enregistrer le data.frame dans l'environnement global
       assign("table_auto_row", desc_bi_row, envir = .GlobalEnv)
     }
+    
+
+    
     
     ### COL
     if(table_type %in% c("col","all")){
@@ -720,9 +881,6 @@ Peut-être qu'un test de Fisher serait plus adapté")
       }
       
       
-      
-      
-      
       if(eff_in_name == "yes"){
         
         desc_bi_col <- desc_bi_col %>% 
@@ -743,7 +901,15 @@ Peut-être qu'un test de Fisher serait plus adapté")
         
       }
       
+      ### VAR NUMERIQUES  #############
       
+      # Si pas de variables num
+      if(is.null(vars_num) == F){
+        desc_bi_col = desc_bi_col |> 
+          bind_rows(desc_bi_num)
+      } # Fin numerique
+      
+      ##################
       
       
       
@@ -753,11 +919,6 @@ Peut-être qu'un test de Fisher serait plus adapté")
       
     } # Fin col
   } # Fin bivar
-  
-  
-  
-  
-  
   
   
   
@@ -799,10 +960,6 @@ Peut-être qu'un test de Fisher serait plus adapté")
   }
   
   
-  
-  
-  
-  
   ### MESSAGE ----
   
   # C'est le message du Chi²
@@ -810,7 +967,6 @@ Peut-être qu'un test de Fisher serait plus adapté")
   if(is.null(var_col) == FALSE){
     print(message_test)
   }
-  
   
   
   
@@ -824,14 +980,14 @@ Peut-être qu'un test de Fisher serait plus adapté")
       if(!table_type %in% c("mix","all")){
         wb <- createWorkbook()
         addWorksheet(wb,"univar")
-        writeData(wb, "univar", desc_uni)
+        writeData(wb, "univar", desc_uni_vf)
         saveWorkbook(wb, excel_filepath, overwrite = TRUE)
         
       } else {
         
         wb <- createWorkbook()
         addWorksheet(wb,"univar")
-        writeData(wb, "univar", desc_uni)
+        writeData(wb, "univar", desc_uni_vf)
         addWorksheet(wb,"mix")
         writeData(wb, "mix", dt_mix)
         saveWorkbook(wb, excel_filepath, overwrite = TRUE)
@@ -860,7 +1016,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
         writeData(wb, "mix", dt_mix)
       }else{
         addWorksheet(wb,"univar")
-        writeData(wb, "univar", desc_uni)
+        writeData(wb, "univar", desc_uni_vf)
         
         obj_names <- c("desc_bi_eff", "desc_bi_row", "desc_bi_col", "dt_mix")
         nom_onglet <- substr(obj_names,nchar(obj_names)-2,nchar(obj_names))
@@ -875,6 +1031,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
       
     }
   }
+  
   
   
   ### HTML                   ----
@@ -1131,5 +1288,71 @@ Peut-être qu'un test de Fisher serait plus adapté")
       } # fin table univar
     } # fin sans colonne
   } # fin html
-}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+} # Fin Fonction
+
+##################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

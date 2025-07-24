@@ -1,6 +1,6 @@
 # Introduction
 
-Il existe un large éventail de packages R consacrés à la gestion et la mise en forme de tables et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de bonne qualité, leurs coûts d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
+Il existe de nombreux packages R consacrés à la gestion et la mise en forme de tables et de tris croisés (`GT`, `flextable`, ...). S'ils sont souvent de bonne qualité, leurs coûts d'entrée peut être un peu élevé pour les utilisateurs.rices occasionnelles de R.
 
 table_auto() se veut une fonction facile d'utilisation permettant de compiler des tris uni- ou bivariées sur un grand nombre de variables, d'utiliser une pondération et les exporter dans un document Excel.
 
@@ -25,6 +25,7 @@ data("hdv2003")
     -   Les effectifs  
     -   Les pourcentages lignes  
     -   Les pourcentages colonnes  
+	-	Quelques indicateurs pour les variables numériques (moyennes, quantiles, etc.)  
 -	Obtenir une table de la combinaison des réponses possibles aux variables présentes  
 -   Utiliser des pondérations (et les normaliser si besoin)  
 -   Garder ou non les valeurs manquantes  
@@ -45,7 +46,8 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 ## Paramètre de la fonction
 
 **data**          : Une base de données                            
-**vars**          : Un vecteur avec des noms de variables         
+**vars**          : Un vecteur avec des noms de variables    
+**vars_num**      : Un vecteur avec des noms de variables numériques         
 **var_col**       :    
 - Si NULL (vide)  : Tris à plat                                    
 - Si une variable : Tris croisés
@@ -109,6 +111,15 @@ mes_vars <- c("relig","trav.imp","trav.satisf","hard.rock",
 
 ```
 
+Ainsi que les variables numériques :  
+
+```{r filename="Choix des variables"}
+
+vars_num  <- c("age","heures.tv")
+
+```
+
+
 ## Suppression de certaines modalités
 
 On peut définir des modalités qui ne doivent pas être utilisées (le total changera donc d'une variable à l'autre).  
@@ -127,21 +138,22 @@ En lançant le code suivant, on crée les data.frames **table_auto_(table_type)*
 
 ```{r filename="Activation de la fonction", warning=FALSE, message=FALSE}
 
-table_auto(hdv2003,                    # Base de données
-           mes_vars,                   # Un vecteur avec les noms des variables d'intérêts
-           var_col        = "qualif",  # Variable à croiser avec celles du vecteur
-           table_type     = "all",     # Type de table : "all", "eff", "row", "col", ou "mix"
-           var_weight     = "poids",   # Variable de pondération, sinon = NULL
-           weight_norm    = FALSE,     # TRUE/FALSE : Normaliser la pondération
-           useNA          = FALSE,     # TRUE/FALSE : Ajout des valeurs manquantes
-           exclude        = junk,      # Exclure des modalités
-           use_test       = "chi2",    # Type de test : "chi2", "fisher", "chi2_noponder", "no"
-           arrondi        = 2,         # Nombre de chiffres après la virgule
-           use_labels     = "no",      # Utiliser les labels : "no", "yes", "both"
-           add_blank_rows = TRUE,      # TRUE/FALSE : Ajout d'une ligne vide entre les variables
-           eff_in_name    = "yes",     # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
-           excel_export   = FALSE,     # TRUE/FALSE : Création d'un fichier excel puis son chemin
+table_auto(hdv2003,                     # Base de données
+           vars           = mes_vars,   # Un vecteur avec les noms des variables d'intérêts
+           vars_num       = vars_num,   # Un vecteur avec les noms des variables d'intérêts numériques
+           var_col        = "qualif",   # Variable à croiser avec celles du vecteur
+           table_type     = "all",      # Type de table : "all", "eff", "row", "col", ou "mix"
+           var_weight     = "poids",    # Variable de pondération, sinon = NULL
+           weight_norm    = FALSE,      # TRUE/FALSE : Normaliser la pondération
+           useNA          = FALSE,      # TRUE/FALSE : Ajout des valeurs manquantes
+           exclude        = junk,       # exclure des modalités
+           use_test       = "chi2",     # Type de test : "chi2", "fisher", "chi2_noponder", "no"
+           arrondi        = 2,          # Nombre de chiffres après la virgule
+           use_labels     = "no",       # Utiliser les labels : "no", "yes", "both"
+           add_blank_rows = TRUE,       # TRUE/FALSE : Ajout d'une ligne vide entre les variables
+           eff_in_name    = "noponder", # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
+           excel_export   = FALSE,      # TRUE/FALSE : Création d'un fichier excel puis son chemin
            excel_filepath = "./table_auto.xlsx", # Seulement si excel_export = TRUE
-           view_html      = TRUE)      # TRUE/FALSE : Afficher la table en HTML
+           view_html      = TRUE)       # TRUE/FALSE : Afficher la table en HTML
 
 ```
