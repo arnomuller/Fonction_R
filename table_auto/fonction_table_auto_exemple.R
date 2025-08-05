@@ -46,9 +46,10 @@ table_auto(hdv2003,                     # Base de données
            use_labels     = "no",       # Utiliser les labels : "no", "yes", "both"
            add_blank_rows = TRUE,       # TRUE/FALSE : Ajout d'une ligne vide entre les variables
            eff_in_name    = "noponder", # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
-           excel_export   = FALSE,      # TRUE/FALSE : Création d'un fichier excel puis son chemin
-           excel_filepath = "./table_auto.xlsx", # Seulement si excel_export = TRUE
-           view_html      = TRUE)       # TRUE/FALSE : Afficher la table en HTML
+           view           = "table",    # Choix de l'affichage : "table", "graph", ou "no"
+           excel_export   = TRUE,       # TRUE/FALSE : Création d'un fichier excel et son chemin
+           excel_filepath = "./table_auto.xlsx" # Chemin vers le fichier excel
+           )      
 
 
 

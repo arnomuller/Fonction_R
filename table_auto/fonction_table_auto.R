@@ -14,8 +14,11 @@
 ## MESSAGES ----
 
 print("DERNIERES MÀJ : ")
-print("MAJ : 24/07/2025")
+print("MAJ : 05/08/2025")
+print("Ajout des graphiques :")
+print("Option view pour choisir de montrer des graphiques ou des tables (ex-view_html)")
 print("")
+print("MAJ : 24/07/2025")
 print("Ajout de vars_num :")
 print("Quelques indicateurs pour les variables numériques")
 
@@ -24,23 +27,25 @@ print("Quelques indicateurs pour les variables numériques")
 
 # Lancer la fonction suivante pour pourvoir l'appeler dans vos prochains scripts :
 
-table_auto <- function(data,                    # Un data.frame
-                       vars           = NULL,   # Un vecteur avec les noms des variables d'intérêts
-                       vars_num       = NULL,   # Un vecteur avec les noms des variables d'intérêts numériques
-                       var_col        = NULL,   # Variable à croiser avec celles du vecteur
-                       var_weight     = NULL,   # Variable de pondération, sinon = NULL
-                       weight_norm    = FALSE,  # Normaliser la pondération
-                       table_type     = "all",  # Type de table : "all", "eff", "row", "col", "mix"
-                       useNA          = TRUE,   # TRUE/FALSE : Ajout des valeurs manquantes
-                       exclude        = NULL,   # Un vecteur avec les noms des modalités à exclure des tables
-                       use_test       = "chi2", # Type de test : "chi2", "fisher", "chi2_noponder", "no"
-                       arrondi        = 2,      # Nombre de chiffres après la virgule
-                       use_labels     = "no",   # Utiliser les labels : "no", "yes", "both"
-                       add_blank_rows = TRUE,   # TRUE/FALSE : Ajout d'une ligne vide entre les variables
-                       eff_in_name    = "no",   # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
-                       excel_export   = FALSE,  # TRUE/FALSE : Création d'un fichier excel et son chemin
-                       excel_filepath = "./table_auto.xlsx", # Chemin vers le fichier excel
-                       view_html      = TRUE){
+table_auto <- function(data,                     # Un data.frame
+                       vars           = NULL,    # Un vecteur avec les noms des variables d'intérêts
+                       vars_num       = NULL,    # Un vecteur avec les noms des variables d'intérêts numériques
+                       var_col        = NULL,    # Variable à croiser avec celles du vecteur
+                       var_weight     = NULL,    # Variable de pondération, sinon = NULL
+                       weight_norm    = FALSE,   # Normaliser la pondération
+                       table_type     = "all",   # Type de table : "all", "eff", "row", "col", "mix"
+                       useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
+                       exclude        = NULL,    # Un vecteur avec les noms des modalités à exclure des tables
+                       use_test       = "chi2",  # Type de test : "chi2", "fisher", "chi2_noponder", "no"
+                       arrondi        = 2,       # Nombre de chiffres après la virgule
+                       use_labels     = "no",    # Utiliser les labels : "no", "yes", "both"
+                       add_blank_rows = TRUE,    # TRUE/FALSE : Ajout d'une ligne vide entre les variables
+                       eff_in_name    = "no",    # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
+                       view           = "table", # Choix de l'affichage : "table", "graph", ou "no"
+                       view_html      = FALSE,   # TRUE/FALSE : Visualisation HTML des tableaux à partir de table_type
+                       excel_export   = FALSE,   # TRUE/FALSE : Création d'un fichier excel et son chemin
+                       excel_filepath = "./table_auto.xlsx" # Chemin vers le fichier excel
+){
   
   #############################
   
@@ -110,6 +115,12 @@ table_auto <- function(data,                    # Un data.frame
   if (weight_norm != TRUE && weight_norm != FALSE) {
     stop("Erreur : weight_norm doit être TRUE ou FALSE")
   }
+  
+  # Vérification du parametre view
+  if (view != "no" && view != "table" && view != "graph") {
+    stop("Erreur : view doit être 'no', 'table', ou 'graph' ")
+  }
+  
   
   # Vérification que les variables numériques 
   if(is.null(vars_num) == F){
@@ -653,7 +664,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
     mutate(Var =" ",
            Levels = "ENSEMBLE") %>%  
     select(Var, Levels,everything())
-
+  
   
   
   
@@ -696,7 +707,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
   
   # Si on a une variable en colonne
   if(is.null(var_col) == FALSE){
-
+    
     ### EFF
     if(table_type %in% c("eff","all")){
       
@@ -731,7 +742,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
         desc_bi_eff <- first_row %>% rbind(NA) %>% bind_rows(desc_bi_eff)  
       }
       
-
+      
       ### Effectif dans les noms
       if(eff_in_name == "yes"){
         
@@ -842,7 +853,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
       assign("table_auto_row", desc_bi_row, envir = .GlobalEnv)
     }
     
-
+    
     
     
     ### COL
@@ -968,6 +979,11 @@ Peut-être qu'un test de Fisher serait plus adapté")
     print(message_test)
   }
   
+  if(view_html == TRUE){
+    print("view_html = TRUE est remplacé par view = 'table' ou view = 'graph', et ne fonctionnera bientôt plus")
+  }
+  
+  
   
   
   ### EXPORT                 ----
@@ -1033,10 +1049,165 @@ Peut-être qu'un test de Fisher serait plus adapté")
   }
   
   
+  ### Graphique              ----
+  
+  if(view == "graph" & table_type != "mix"){
+    
+    ### DONNEES 
+    if(!is.null(var_col)){ # Si bivar
+      
+      if(table_type == "row"){
+        dt_plot = table_auto_row
+      } else if(table_type == "col"){
+        dt_plot = table_auto_col
+      } else { 
+        dt_plot = table_auto_eff
+      }
+      
+      dt_plot = dt_plot                    |> 
+        filter(!Var %in% c(vars_num, " ")) |> 
+        filter(!is.na(Var))                |> 
+        pivot_longer(unique(tab_commune$Groupe),
+                     names_to = "Groupe",
+                     values_to = "value")  |> 
+        mutate(Levels2 = paste(Var,Levels,sep = "__"))                       |> 
+        mutate(Var = factor(Var, levels = unique(Var)))                      |> 
+        mutate(Levels2 = factor(Levels2, 
+                                levels = rev(unique(Levels2)),
+                                labels = sub(".*?__", "", rev(unique(Levels2))))) |> 
+        mutate(Groupe = factor(Groupe, 
+                               levels = rev(unique(Groupe))))                     |> 
+        arrange(Var,Levels2,Groupe)  
+      
+    } else { # Si univar
+      dt_plot = table_auto_univar
+      dt_plot = dt_plot |> 
+        filter(!Var %in% c(vars_num, " ")) |> 
+        filter(!is.na(Var))    |> 
+        mutate(Levels2 = paste(Var,Levels,sep = "__")) |> 
+        mutate(Var = factor(Var, levels = unique(Var))) |> 
+        mutate(Levels2 = factor(Levels2, 
+                                levels = rev(unique(Levels2)),
+                                labels = sub(".*?__", "", rev(unique(Levels2))))) |> 
+        arrange(Var,Levels2)    
+    }
+    
+    
+    ### PARAMETRES GRAPHIQUES
+    
+    # Paramètres 
+    
+    fill_color = c("#8DD3C7","#FDB462","#BEBADA","#FB8072","#80B1D3","#B3DE69","#FCCDE5","#FFFFB3","#D9D9D9","#8DD3C7","#FDB462","#BEBADA","#FB8072","#80B1D3","#B3DE69","#FCCDE5","#FFFFB3","#D9D9D9")
+    
+    montheme = theme(
+      strip.text.y.left = element_text(size = 12, colour = "white",face = 2, angle = 0),
+      strip.background.y = element_rect(fill = "#2F4359",colour = NA),
+      strip.text.x = element_text(size = 12, colour = "#2F4359",face = 2),
+      strip.background.x = element_rect(fill = "#e4e9f2",colour = NA),
+      strip.placement = "outside",
+      
+      
+      legend.position="bottom",
+      legend.title=element_blank(),
+      legend.text = element_text(size = 12,colour = "#2F4359"),
+      legend.justification='center',
+      legend.margin=margin(t=-8),
+      
+      panel.grid.minor.y=element_blank(),
+      panel.grid.major.y=element_line(color = "lightgrey",linewidth = 0.25,linetype = "dotted"),
+      panel.grid.minor.x=element_blank(),
+      panel.grid.major.x=element_line(color = "lightgrey",linewidth = 0.25,linetype = "dotted"),
+      
+      axis.text = element_text(size = 12, colour = "#2F4359"),
+      axis.title = element_blank()
+    ) 
+    
+    # Legendes
+    rowlegend = case_when(
+      length(unique(dt_plot$Groupe)) <= 3 ~ 1,
+      length(unique(dt_plot$Groupe)) %in% c(4:6)  ~ 2,
+      TRUE ~ 3
+    )
+    monguide = guides(
+      fill  = guide_legend(
+        title.position = "top",
+        reverse = T,
+        nrow = rowlegend,
+        byrow = T)
+    ) 
+    
+    
+    ### GRAPHIQUES
+    
+    if(!is.null(var_col)){ # Si bivar
+      if(table_type == "row"){
+        # Pourcentage lignes
+        p = dt_plot |> 
+          ggplot(aes(x = Levels2, y = value, fill = Groupe)) +
+          facet_grid(Var ~ ., scales = "free_y", space = "free_y", switch = "y") +
+          geom_col()      +
+          scale_fill_manual(values = fill_color) +
+          scale_y_continuous(breaks = seq(0,100,20), labels = paste0(seq(0,100,20), "%")) +
+          coord_flip()    +
+          theme_minimal() +
+          montheme        +
+          monguide
+      } else if(table_type == "col"){
+        # Pourcentage colonnes
+        p = dt_plot |> 
+          ggplot(aes(x = Levels2, y = value, fill = Groupe)) +
+          facet_grid(Var ~ Groupe, scales = "free_y", space = "free_y", switch = "y") +
+          geom_col(width = 1, colour = "#404040")      +
+          scale_fill_manual(values = fill_color) +
+          scale_y_continuous(breaks = seq(0,100,20)) +
+          ylab("En %")    +
+          coord_flip()    +
+          theme_minimal() +
+          montheme        +
+          theme(axis.title.x = element_text(size = 12,colour = "#2F4359", hjust = 1)) +
+          monguide
+      } else { 
+        # Effectif bivar
+        p = dt_plot |> 
+          ggplot(aes(x = Levels2, y = value, fill = Groupe)) +
+          facet_grid(Var ~ ., scales = "free_y", space = "free_y", switch = "y") +
+          geom_col()      +
+          scale_fill_manual(values = fill_color) +
+          coord_flip()    +
+          theme_minimal() +
+          montheme        +
+          monguide
+      }
+    } else { # Si univar
+      # Univarié
+      p = dt_plot |> 
+        ggplot(aes(x = Levels2, y = Freq, fill = Var, color = Var)) +
+        facet_grid(Var ~ ., scales = "free_y", space = "free_y", switch = "y") +
+        geom_segment(aes(yend = 0 , xend = Levels2), 
+                     linewidth = 1.25, alpha = 0.33) +
+        geom_point(position = "identity", 
+                   shape = 20, 
+                   size = 4) +
+        scale_fill_manual(values = fill_color) +
+        scale_color_manual(values = fill_color) +
+        scale_y_continuous(breaks = seq(0,100,20), labels = paste(seq(0,100,20), "%")) +
+        coord_flip() +
+        theme_minimal() +
+        montheme        +
+        guides(
+          color = "none",
+          fill  = "none"
+        ) 
+    } # Fin Choix graphiques
+    
+    return(p)
+    
+  } # Fin graph
+  
   
   ### HTML                   ----
   
-  if(view_html == TRUE){
+  if(view_html == TRUE | view == "table"| table_type == "mix"){
     
     if(!is.null(var_col)){
       
@@ -1061,7 +1232,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
         
         titre = var_col
         
-        html_dt                       |> 
+        show_tab = html_dt                       |> 
           filter(is.na(Var) == FALSE) |> 
           group_by(Var)               |> 
           gt()                        |>
@@ -1109,7 +1280,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
       } else {
         
         nb_col = ncol(dt_mix)
-        dt_mix |> 
+        show_tab = dt_mix |> 
           rename(Effectifs = Eff,
                  `Fréquences` = Pct,
                  `Fréquences cumulées` = PctCum) |> 
@@ -1179,7 +1350,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
       if(table_type == "mix"){
         
         nb_col = ncol(dt_mix)
-        dt_mix |> 
+        show_tab = dt_mix |> 
           rename(Effectifs = Eff,
                  `Fréquences` = Pct,
                  `Fréquences cumulées` = PctCum) |> 
@@ -1245,7 +1416,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
         
       } else {
         
-        table_auto_univar             |> 
+        show_tab = table_auto_univar             |> 
           rename(`Fréquences` = Freq,
                  `Fréquences cumulées` = FreqCum) |> 
           filter(is.na(Var) == FALSE) |> 
@@ -1287,72 +1458,13 @@ Peut-être qu'un test de Fisher serait plus adapté")
         
       } # fin table univar
     } # fin sans colonne
+    
+    return(show_tab)
+    
   } # fin html
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   
 } # Fin Fonction
 
 ##################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

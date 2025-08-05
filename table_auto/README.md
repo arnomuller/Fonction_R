@@ -83,8 +83,10 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 
 **excel_export**   : TRUE ou FALSE, création d'un fichier excel.        
 **excel_filepath** : Chemin et nom du fichier excel (défaut : "table_auto.xlsx")    
-**view_html**      : TRUE ou FALSE, affiche la table choisie dans table_type en HTML       
-
+**view**           : Choix de l'affichage : "table", "graph", ou "no"      
+- "table"  : Affiche une table au format html (ex- view_html)
+- "graph"  : Affiche un graphique différent pour table_type = "eff", "row", ou "col"
+- "no"     : Pas d'affichage
 
 
 ## Import de la fonction `table_auto()`
@@ -152,8 +154,8 @@ table_auto(hdv2003,                     # Base de données
            use_labels     = "no",       # Utiliser les labels : "no", "yes", "both"
            add_blank_rows = TRUE,       # TRUE/FALSE : Ajout d'une ligne vide entre les variables
            eff_in_name    = "noponder", # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
-           excel_export   = FALSE,      # TRUE/FALSE : Création d'un fichier excel puis son chemin
-           excel_filepath = "./table_auto.xlsx", # Seulement si excel_export = TRUE
-           view_html      = TRUE)       # TRUE/FALSE : Afficher la table en HTML
-
+           view           = "table",    # Choix de l'affichage : "table", "graph", ou "no"
+           excel_export   = TRUE,       # TRUE/FALSE : Création d'un fichier excel et son chemin
+           excel_filepath = "./table_auto.xlsx" # Chemin vers le fichier excel
+           )     
 ```
