@@ -15,6 +15,7 @@
 
 print("DERNIERES MÀJ : ")
 print("MAJ : 15/08/2025")
+print("Ajout des Intervalles de Confiance pour row et col")
 print("Correction bug eff_in_name = 'yes'")
 print("")
 print("MAJ : 05/08/2025")
@@ -37,6 +38,7 @@ table_auto <- function(data,                     # Un data.frame
                        var_weight     = NULL,    # Variable de pondération, sinon = NULL
                        weight_norm    = FALSE,   # Normaliser la pondération
                        table_type     = "all",   # Type de table : "all", "eff", "row", "col", "mix"
+                       IC             = NULL,    # Risque de l'intervalles de confiances, si NULL : pas d'intervalles
                        useNA          = TRUE,    # TRUE/FALSE : Ajout des valeurs manquantes
                        exclude        = NULL,    # Un vecteur avec les noms des modalités à exclure des tables
                        use_test       = "chi2",  # Type de test : "chi2", "fisher", "chi2_noponder", "no"
@@ -209,10 +211,15 @@ table_auto <- function(data,                     # Un data.frame
   # Si pas de variables num
   if(is.null(vars_num) == F){
     
-    # Renomme la variable de colonne
-    dt_num <- dt_num                        |> 
-      select(all_of(var_col), everything()) |> 
-      rename(Groupe = 1) 
+    if(is.null(var_col) == FALSE){
+      # Renomme la variable de colonne
+      dt_num <- dt_num                        |> 
+        select(all_of(var_col), everything()) |> 
+        rename(Groupe = 1) |> 
+        mutate(Groupe = if_else(is.na(Groupe), "Val.Manq.", Groupe),
+               Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq."))) 
+      
+    }
     
     
     
@@ -257,10 +264,11 @@ table_auto <- function(data,                     # Un data.frame
     
     if(is.null(var_col) == FALSE){
       
+      
       # Gestion des NA
       if(useNA == FALSE){
         dt_num <- dt_num |> 
-          filter(Groupe != "Val.Manq." | is.na(Groupe) == TRUE )
+          filter(Groupe != "Val.Manq." | is.na(Groupe) == FALSE )
       }
       # Exclure des modalités des calculs
       if (is.null(exclude) == FALSE) {
@@ -322,6 +330,8 @@ table_auto <- function(data,                     # Un data.frame
   desc_bi_eff <- data.frame()
   desc_bi_row <- data.frame()
   desc_bi_col <- data.frame()
+  
+  #i = 3
   
   
   if(is.null(vars) == FALSE){
@@ -392,12 +402,23 @@ table_auto <- function(data,                     # Un data.frame
                  Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq."))) %>% 
           arrange(Groupe,Levels)
         
+        dt_commune = dt |> 
+          mutate(Levels = if_else(is.na(get(vars[i])), "Val.Manq.", get(vars[i])),
+                 Groupe = if_else(is.na(get(var_col)), "Val.Manq.", get(var_col))) %>% 
+          mutate(Levels = factor(Levels, levels = c(with(dt,names(table(get(vars[i])))),"Val.Manq.")),
+                 Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq.")))
         
         # Gestion des NA
         if(useNA == FALSE){
           tab_commune <- tab_commune %>% 
             filter(Levels != "Val.Manq."| is.na(Levels) == TRUE) %>% 
             filter(Groupe != "Val.Manq."| is.na(Groupe) == TRUE)
+          
+          dt_commune = dt_commune |> 
+            filter(Levels != "Val.Manq." & Groupe != "Val.Manq.") 
+            
+            
+          
         }
         
         # Exclure des modalités des calculs
@@ -405,7 +426,13 @@ table_auto <- function(data,                     # Un data.frame
           tab_commune <- tab_commune |> 
             filter(!Levels %in% exclude) |> 
             filter(!Groupe %in% exclude)
+          
+          dt_commune = dt_commune |> 
+            filter(!Groupe %in% exclude) |> 
+            filter(!Levels %in% exclude)
         }
+        
+        
         
         
         ##################
@@ -537,12 +564,16 @@ Peut-être qu'un test de Fisher serait plus adapté")
         ##################
         ### EFFECTIF
         if(table_type %in% c("eff","all")){
+          
+          
           tab_eff <- tab_commune %>% 
             mutate(ENSEMBLE = round(ENSEMBLE,arrondi)) |> 
             pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
             mutate(Var = vars[i]) %>%  
             select(Var,Levels,everything()) %>% 
             left_join(select(desc_uni, Var,Levels, ENSEMBLE), by = c("Var","Levels"))
+          
+          
           
           # Variables du Chi²
           if(use_test %in% c("chi2", "chi2_noponder")){
@@ -573,16 +604,57 @@ Peut-être qu'un test de Fisher serait plus adapté")
         ### LIGNES
         if(table_type %in% c("row","all")){
           
-          tab_row <- tab_commune |> 
-            # Pourcentage Row
-            group_by(Levels) %>% 
-            mutate(Value = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
-            mutate(ENSEMBLE = sum(Value)) |> 
-            pivot_wider(names_from = Groupe, values_from = Value)  %>% 
-            mutate(Var = vars[i]) %>%  
-            select(Var,Levels,everything()) %>%  
-            relocate(ENSEMBLE, .after = last_col()) %>% 
-            ungroup()
+          
+          if(is.null(IC) == TRUE){
+            tab_row <- tab_commune |> 
+              # Pourcentage Row
+              group_by(Levels) %>% 
+              mutate(Value = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
+              mutate(ENSEMBLE = sum(Value)) |> 
+              pivot_wider(names_from = Groupe, values_from = Value)  %>% 
+              mutate(Var = vars[i]) %>%  
+              select(Var,Levels,everything()) %>%  
+              relocate(ENSEMBLE, .after = last_col()) %>% 
+              ungroup()
+          } else {
+            
+            
+            IC_part_1 <- dt_commune %>%
+              group_by(Levels) %>%
+              mutate(prop = ponderation / sum(ponderation)) %>%
+              group_by(Levels , Groupe) %>%
+              summarise(
+                Value = sum(ponderation),
+                .groups = "drop")
+            IC_part_2 <- dt_commune %>%
+              group_by(Levels) %>%
+              summarise(
+                total_w = sum(ponderation),
+                n_eff = (sum(ponderation)^2) / sum(ponderation^2),
+                .groups = "drop")
+            
+            tab_row = IC_part_1 |> 
+              left_join(IC_part_2, by = "Levels") |> 
+              
+              mutate(Value = Value / total_w) %>%
+              mutate(
+                Margin = qnorm(1 - (1 - IC) / 2) * sqrt(Value * (1 - Value) / n_eff),
+                lower  = round((Value - Margin)*100,arrondi),
+                upper  = round((Value + Margin)*100,arrondi),
+                IC = paste0("[", lower, "% ; ",upper,"%]"),
+                Value_vf = paste0(round(Value*100, arrondi)," ",IC)) |> 
+              group_by(Levels) |> 
+              mutate(ENSEMBLE = sum(Value*100)) |> 
+              select(Groupe, Levels, ENSEMBLE, Value_vf) |> 
+              pivot_wider(names_from = Groupe, values_from = Value_vf)  %>% 
+              mutate(Var = vars[i]) %>%  
+              select(Var,Levels,everything()) %>%  
+              relocate(ENSEMBLE, .after = last_col()) %>% 
+              ungroup()
+            
+            
+          } # Fin IC
+          
           
           # Variables du Chi²
           if(use_test %in% c("chi2", "chi2_noponder")){
@@ -597,6 +669,10 @@ Peut-être qu'un test de Fisher serait plus adapté")
             tab_row <- tab_row %>% mutate(fisher_pvalue = round(test$p.value,3))
             
           }
+          
+          
+          
+          
           
           # On ajoute la boucle à la table générale
           desc_bi_row <- rbind(desc_bi_row,tab_row)
@@ -613,16 +689,57 @@ Peut-être qu'un test de Fisher serait plus adapté")
         ##################
         if(table_type %in% c("col","all")){
           
-          tab_col <- tab_commune %>%
-            # Pourcentage Col
-            group_by(Groupe) %>% 
-            mutate(ENSEMBLE = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
-            pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
-            mutate(Var = vars[i]) %>%  
-            select(Var,Levels,everything()) %>% 
-            left_join(select(desc_uni, Var,Levels, Freq), by = c("Var","Levels")) %>% 
-            rename(ENSEMBLE=Freq) %>% 
-            ungroup()
+          if(is.null(IC) == TRUE){
+            tab_col <- tab_commune %>%
+              # Pourcentage Col
+              group_by(Groupe) %>% 
+              mutate(ENSEMBLE = round((ENSEMBLE*100)/sum(ENSEMBLE), arrondi)) %>% 
+              pivot_wider(names_from = Groupe, values_from = ENSEMBLE)  %>% 
+              mutate(Var = vars[i]) %>%  
+              select(Var,Levels,everything()) %>% 
+              left_join(select(desc_uni, Var,Levels, Freq), by = c("Var","Levels")) %>% 
+              rename(ENSEMBLE=Freq) %>% 
+              ungroup()
+          } else {
+            
+            IC_part_1_col <- dt_commune %>%
+              group_by(Groupe) %>%
+              mutate(prop = ponderation / sum(ponderation)) %>%
+              group_by(Groupe, Levels) %>%
+              summarise(
+                Value = sum(ponderation),
+                .groups = "drop"
+              )
+            
+            IC_part_2_col <- dt_commune %>%
+              group_by(Groupe) %>%
+              summarise(
+                total_w = sum(ponderation),
+                n_eff   = (sum(ponderation)^2) / sum(ponderation^2),
+                .groups = "drop"
+              )
+            
+            tab_col <- IC_part_1_col %>%
+              left_join(IC_part_2_col, by = "Groupe") %>%
+              mutate(
+                Value  = Value / total_w,
+                Margin = qnorm(1 - (1 - IC) / 2) * sqrt(Value * (1 - Value) / n_eff),
+                lower  = round((Value - Margin) * 100, arrondi),
+                upper  = round((Value + Margin) * 100, arrondi),
+                IC     = paste0("[", lower, "% ; ", upper, "%]"),
+                Value_vf = paste0(round(Value * 100, arrondi), " ", IC)
+              ) %>%
+              select(Levels, Groupe, Value_vf) %>%
+              pivot_wider(names_from = Groupe, values_from = Value_vf) %>%
+              mutate(Var = vars[i]) %>%
+              select(Var, Levels, everything()) %>%
+              left_join(select(desc_uni, Var,Levels, Freq), by = c("Var","Levels")) %>% 
+              rename(ENSEMBLE=Freq) |> 
+              relocate(ENSEMBLE, .after = last_col()) %>%
+              ungroup()
+          }
+          
+          
           
           # Variables du Chi²
           if(use_test %in% c("chi2", "chi2_noponder")){
@@ -746,13 +863,6 @@ Peut-être qu'un test de Fisher serait plus adapté")
       }
       
       
-      
-      
-      
-      
-      
-      
-      
       ### Effectif dans les noms
       if(eff_in_name == "yes"){
         
@@ -814,7 +924,15 @@ Peut-être qu'un test de Fisher serait plus adapté")
         select(-Eff)  %>% 
         mutate(ENSEMBLE = sum(Pct),
                Var =" ",
-               Levels = "ENSEMBLE") %>%  
+               Levels = "ENSEMBLE") 
+      
+      # Intervalle de confiance en character
+      if (is.null(IC) == FALSE) {
+        first_row <- first_row |> 
+          mutate(Pct = as.character(Pct))
+      }
+      
+      first_row <- first_row %>%  
         pivot_wider(names_from = Groupe, values_from = Pct) %>% 
         select(-ENSEMBLE,Var, Levels,everything(),ENSEMBLE)
       
@@ -850,8 +968,14 @@ Peut-être qu'un test de Fisher serait plus adapté")
       
       # Si pas de variables num
       if(is.null(vars_num) == F){
+        
+        if (is.null(IC) == FALSE) {
+          desc_bi_num <- desc_bi_num |> 
+            mutate(across(-c(Var, Levels, ENSEMBLE), ~ as.character(.)))
+        }
         desc_bi_row = desc_bi_row |> 
           bind_rows(desc_bi_num)
+        
       } # Fin numerique
       
       ##################
@@ -885,6 +1009,12 @@ Peut-être qu'un test de Fisher serait plus adapté")
       if (is.null(exclude) == FALSE) {
         first_row <- first_row |> 
           filter(!Groupe %in% exclude)
+      }
+      
+      # Intervalle de confiance en character
+      if (is.null(IC) == FALSE) {
+        first_row <- first_row |> 
+          mutate(Eff = as.character(Eff))
       }
       
       first_row <- first_row %>%  
@@ -926,6 +1056,12 @@ Peut-être qu'un test de Fisher serait plus adapté")
       
       # Si pas de variables num
       if(is.null(vars_num) == F){
+        
+        if (is.null(IC) == FALSE) {
+          desc_bi_num <- desc_bi_num |> 
+            mutate(across(-c(Var, Levels, ENSEMBLE), ~ as.character(.)))
+        }
+        
         desc_bi_col = desc_bi_col |> 
           bind_rows(desc_bi_num)
       } # Fin numerique
@@ -1067,9 +1203,15 @@ Peut-être qu'un test de Fisher serait plus adapté")
     if(!is.null(var_col)){ # Si bivar
       
       if(table_type == "row"){
-        dt_plot = table_auto_row
+        dt_plot = table_auto_row |> 
+          mutate(across(-c(Var, Levels, ENSEMBLE), ~ str_remove(., " \\[.*$"))) |> 
+          mutate(across(-c(Var, Levels), ~ as.numeric(.)))
       } else if(table_type == "col"){
-        dt_plot = table_auto_col
+        
+        
+        dt_plot = table_auto_col |> 
+          mutate(across(-c(Var, Levels, ENSEMBLE), ~ str_remove(., " \\[.*$"))) |> 
+          mutate(across(-c(Var, Levels), ~ as.numeric(.)))
       } else { 
         dt_plot = table_auto_eff
       }
@@ -1222,9 +1364,11 @@ Peut-être qu'un test de Fisher serait plus adapté")
     if(!is.null(var_col)){
       
       if(table_type == "row"){
-        html_dt = table_auto_row
+        html_dt = table_auto_row |> 
+          mutate_all(~ str_replace_all(., " \\[", "<br>["))
       } else if(table_type == "col"){
-        html_dt = table_auto_col
+        html_dt = table_auto_col |> 
+          mutate_all(~ str_replace_all(., " \\[", "<br>["))
       } else { 
         html_dt = table_auto_eff
       }
@@ -1246,6 +1390,7 @@ Peut-être qu'un test de Fisher serait plus adapté")
           filter(is.na(Var) == FALSE) |> 
           group_by(Var)               |> 
           gt()                        |>
+          fmt_markdown(columns = everything())   |> 
           # Titre ligne du haut
           tab_spanner(
             label = html(titre),

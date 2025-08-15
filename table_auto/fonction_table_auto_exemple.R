@@ -36,18 +36,19 @@ table_auto(hdv2003,                     # Base de données
            vars           = mes_vars,   # Un vecteur avec les noms des variables d'intérêts
            vars_num       = vars_num,   # Un vecteur avec les noms des variables d'intérêts numériques
            var_col        = "qualif",   # Variable à croiser avec celles du vecteur
-           table_type     = "all",      # Type de table : "all", "eff", "row", "col", ou "mix"
+           table_type     = "row",      # Type de table : "all", "eff", "row", "col", ou "mix"
+           IC             = 0.95,       # Risque de l'intervalles de confiances, si NULL : pas d'intervalles
            var_weight     = "poids",    # Variable de pondération, sinon = NULL
-           weight_norm    = FALSE,      # TRUE/FALSE : Normaliser la pondération
-           useNA          = FALSE,      # TRUE/FALSE : Ajout des valeurs manquantes
+           weight_norm    = TRUE,       # TRUE/FALSE : Normaliser la pondération
+           useNA          = TRUE,       # TRUE/FALSE : Ajout des valeurs manquantes
            exclude        = junk,       # exclure des modalités
            use_test       = "chi2",     # Type de test : "chi2", "fisher", "chi2_noponder", "no"
            arrondi        = 2,          # Nombre de chiffres après la virgule
-           use_labels     = "no",       # Utiliser les labels : "no", "yes", "both"
+           use_labels     = "yes",      # Utiliser les labels : "no", "yes", "both"
            add_blank_rows = TRUE,       # TRUE/FALSE : Ajout d'une ligne vide entre les variables
            eff_in_name    = "noponder", # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
-           view           = "table",    # Choix de l'affichage : "table", "graph", ou "no"
-           excel_export   = TRUE,       # TRUE/FALSE : Création d'un fichier excel et son chemin
+           view           = "graph",    # Choix de l'affichage : "table", "graph", ou "no"
+           excel_export   = FALSE,      # TRUE/FALSE : Création d'un fichier excel et son chemin
            excel_filepath = "./table_auto.xlsx" # Chemin vers le fichier excel
            )      
 

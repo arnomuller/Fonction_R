@@ -28,6 +28,7 @@ data("hdv2003")
 	-	Quelques indicateurs pour les variables numériques (moyennes, quantiles, etc.)  
 -	Obtenir une table de la combinaison des réponses possibles aux variables présentes  
 -   Utiliser des pondérations (et les normaliser si besoin)  
+-	Afficher les intervalles de confiances   
 -   Garder ou non les valeurs manquantes  
 -   Exclure des modalités choisies  
 -	Obtenir les résultats d'un test (chi² ou fisher)  
@@ -57,8 +58,12 @@ Une fois la fonction chargée, il suffit de la lancer en renseignant les variabl
 -   Pourcentage ligne  		    : "row"  
 -   Pourcentage colonne 		: "col"  
 -	Tout                        : "all"
--	La combinaison des réponses : "mix"  
-                  
+-	La combinaison des réponses : "mix"   
+
+**IC**             : Risque de l'intervalle de confiances.   
+- si NULL (vide): pas d'intervalles de confiance (par défaut).  
+- sinon prendre une valeur entre 0 et 1 (privilégier : 0.95)  
+
 **var_weight**     : Le nom d'une variable de pondération dans data      
 **weight_norm**	   : TRUE ou FALSE, normaliser la pondération     
 **useNA**          : TRUE ou FALSE, garder ou non les valeurs manquantes    
@@ -139,23 +144,24 @@ junk = c("NSP ou NVPR", "Cadre", "Rejet")
 En lançant le code suivant, on crée les data.frames **table_auto_(table_type)**.
 
 ```{r filename="Activation de la fonction", warning=FALSE, message=FALSE}
-
 table_auto(hdv2003,                     # Base de données
            vars           = mes_vars,   # Un vecteur avec les noms des variables d'intérêts
            vars_num       = vars_num,   # Un vecteur avec les noms des variables d'intérêts numériques
            var_col        = "qualif",   # Variable à croiser avec celles du vecteur
-           table_type     = "all",      # Type de table : "all", "eff", "row", "col", ou "mix"
+           table_type     = "row",      # Type de table : "all", "eff", "row", "col", ou "mix"
+           IC             = 0.95,       # Risque de l'intervalles de confiances, si NULL : pas d'intervalles
            var_weight     = "poids",    # Variable de pondération, sinon = NULL
-           weight_norm    = FALSE,      # TRUE/FALSE : Normaliser la pondération
-           useNA          = FALSE,      # TRUE/FALSE : Ajout des valeurs manquantes
+           weight_norm    = TRUE,       # TRUE/FALSE : Normaliser la pondération
+           useNA          = TRUE,       # TRUE/FALSE : Ajout des valeurs manquantes
            exclude        = junk,       # exclure des modalités
            use_test       = "chi2",     # Type de test : "chi2", "fisher", "chi2_noponder", "no"
            arrondi        = 2,          # Nombre de chiffres après la virgule
-           use_labels     = "no",       # Utiliser les labels : "no", "yes", "both"
+           use_labels     = "yes",      # Utiliser les labels : "no", "yes", "both"
            add_blank_rows = TRUE,       # TRUE/FALSE : Ajout d'une ligne vide entre les variables
            eff_in_name    = "noponder", # Ajout des effectifs dans les noms des modalités : "yes","noponder", "no"
-           view           = "table",    # Choix de l'affichage : "table", "graph", ou "no"
-           excel_export   = TRUE,       # TRUE/FALSE : Création d'un fichier excel et son chemin
+           view           = "graph",    # Choix de l'affichage : "table", "graph", ou "no"
+           excel_export   = FALSE,      # TRUE/FALSE : Création d'un fichier excel et son chemin
            excel_filepath = "./table_auto.xlsx" # Chemin vers le fichier excel
-           )     
+           )  
 ```
+  
