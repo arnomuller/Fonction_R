@@ -14,6 +14,9 @@
 ## MESSAGES ----
 
 print("DERNIERES MÀJ : ")
+print("MAJ : 15/08/2025")
+print("Correction bug eff_in_name = 'yes'")
+print("")
 print("MAJ : 05/08/2025")
 print("Ajout des graphiques :")
 print("Option view pour choisir de montrer des graphiques ou des tables (ex-view_html)")
@@ -743,15 +746,20 @@ Peut-être qu'un test de Fisher serait plus adapté")
       }
       
       
+      
+      
+      
+      
+      
+      
+      
       ### Effectif dans les noms
       if(eff_in_name == "yes"){
         
         desc_bi_eff <- desc_bi_eff %>% 
-          bind_cols(select(desc_uni,Total)) %>% 
           mutate(Levels = if_else(is.na(Levels),
                                   NA,
-                                  paste0(Levels," (n = ",Total,")"))) %>% 
-          select(-Total)
+                                  paste0(Levels," (n = ",ENSEMBLE,")"))) 
         
       } else if(eff_in_name == "noponder") {
         
@@ -821,11 +829,11 @@ Peut-être qu'un test de Fisher serait plus adapté")
       if(eff_in_name == "yes"){
         
         desc_bi_row <- desc_bi_row %>% 
-          bind_cols(select(desc_uni,Total)) %>% 
+          bind_cols(select(desc_uni,ENSEMBLE_Eff = ENSEMBLE)) %>% 
           mutate(Levels = if_else(is.na(Levels),
                                   NA,
-                                  paste0(Levels," (n = ",Total,")"))) %>% 
-          select(-Total)
+                                  paste0(Levels," (n = ",ENSEMBLE_Eff,")"))) %>% 
+          select(-ENSEMBLE_Eff)
         
       } else if(eff_in_name == "noponder") {
         
@@ -892,14 +900,16 @@ Peut-être qu'un test de Fisher serait plus adapté")
       }
       
       
+      
+      
       if(eff_in_name == "yes"){
         
         desc_bi_col <- desc_bi_col %>% 
-          bind_cols(select(desc_uni,Total)) %>% 
+          bind_cols(select(desc_uni,ENSEMBLE_Eff = ENSEMBLE)) %>% 
           mutate(Levels = if_else(is.na(Levels),
                                   NA,
-                                  paste0(Levels," (n = ",Total,")"))) %>% 
-          select(-Total)
+                                  paste0(Levels," (n = ",ENSEMBLE_Eff,")"))) %>% 
+          select(-ENSEMBLE_Eff)
         
       } else if(eff_in_name == "noponder") {
         
