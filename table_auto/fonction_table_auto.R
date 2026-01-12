@@ -133,8 +133,8 @@ table_auto <- function(data,                     # Un data.frame
     tryCatch(                
       expr = {                      
         data2 = data |> 
-          mutate(across(matches(vars_num), as.character)) |> 
-          mutate(across(matches(vars_num), as.numeric))
+          mutate(across(all_of(vars_num), as.character)) |> 
+          mutate(across(all_of(vars_num), as.numeric))
       },
       warning = function(w){       
         print("Attention : dans vars_num, des modalités ne sont pas numériques")
@@ -142,8 +142,8 @@ table_auto <- function(data,                     # Un data.frame
     )
     # On passe en numérique
     data = data |> 
-      mutate(across(matches(vars_num), as.character)) |> 
-      mutate(across(matches(vars_num), as.numeric))
+      mutate(across(all_of(vars_num), as.character)) |> 
+      mutate(across(all_of(vars_num), as.numeric))
   } # Fin vérif' numerique
   #############################
   
@@ -167,27 +167,27 @@ table_auto <- function(data,                     # Un data.frame
     dt <- data %>% 
       mutate(ponderation = ponder_calc) %>% 
       select(any_of(c(vars,var_col)),ponderation) %>% 
-      mutate(across(!matches("ponderation"), as.factor))
+      mutate(across(!all_of("ponderation"), as.factor))
     dt_num <- data %>% 
       mutate(ponderation = ponder_calc) %>% 
       select(any_of(c(vars_num,var_col)),ponderation) %>% 
-      mutate(across(!matches(c("ponderation", vars_num)), as.factor))
+      mutate(across(!all_of(c("ponderation", vars_num)), as.factor))
   } else if (use_labels == "yes"){
     dt <- data %>% 
       mutate(ponderation = ponder_calc) %>% 
       select(any_of(c(vars,var_col)),ponderation) %>% 
       mutate(across(where(~ !is.null(attr(.x, "labels"))), haven::as_factor)) %>% 
-      mutate(across(where(~ is.null(attr(.x, "labels"))) & !matches("ponderation"), as.factor))
+      mutate(across(where(~ is.null(attr(.x, "labels"))) & !all_of("ponderation"), as.factor))
     dt_num <- data %>% 
       mutate(ponderation = ponder_calc) %>% 
       select(any_of(c(vars_num,var_col)),ponderation) %>% 
       mutate(across(where(~ !is.null(attr(.x, "labels"))), haven::as_factor)) %>% 
-      mutate(across(where(~ is.null(attr(.x, "labels"))) & !matches(c("ponderation", vars_num)), as.factor))
+      mutate(across(where(~ is.null(attr(.x, "labels"))) & !all_of(c("ponderation", vars_num)), as.factor))
   } else if (use_labels == "both"){
     dt <- data %>% 
       mutate(ponderation = ponder_calc) %>% 
       select(any_of(c(vars,var_col)),ponderation) %>% 
-      mutate(across(!matches("ponderation"), ~case_when(
+      mutate(across(!all_of("ponderation"), ~case_when(
         is.na(.) ~ NA,
         is.null(attributes(.)$labels) ~ as.factor(.),
         TRUE ~ paste0(as.factor(.)," : ",as_factor(.)))
@@ -195,7 +195,7 @@ table_auto <- function(data,                     # Un data.frame
     dt_num <- data %>% 
       mutate(ponderation = ponder_calc) %>% 
       select(any_of(c(vars_num,var_col)),ponderation) %>% 
-      mutate(across(!matches(c("ponderation", vars_num)), ~case_when(
+      mutate(across(!all_of(c("ponderation", vars_num)), ~case_when(
         is.na(.) ~ NA,
         is.null(attributes(.)$labels) ~ as.factor(.),
         TRUE ~ paste0(as.factor(.)," : ",as_factor(.)))
