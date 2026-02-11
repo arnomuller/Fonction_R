@@ -1,0 +1,1304 @@
+---
+title: "Graphiques Premiers Résultats"
+subtitle: "Documentation de la fonction pour les graphiques en barre"
+author: "Arno Muller"
+lang: fr
+format:
+  html:
+    theme: simplex
+    toc: true
+    toc-depth: 4
+    toc-title: Table des matières
+    grid:
+      margin-width: 350px
+reference-location: margin
+citation-location: margin
+self-contained: true
+---
+
+
+
+
+# Introduction 
+
+
+
+## Informations générales
+
+
+&#x2192; **Objectifs :** Faire des graphiques, les plus uniformes possibles pour la "collection" des 1er Résultats des Enquêtes Ined.  
+
+&#x2192; **Graphiques possibles :**  
+
+  - Bâtons côte-à-côte.  
+  
+  - Barres empilées.  
+  
+  - Courbes  
+  
+
+
+&#x2192; **Où trouver les fonctions :** Elles sont hébergées dans les espaces partagés des groupes d'exploitations.  
+
+
+
+## Utilisation des fonctions
+
+
+1) Importer ou créer des données à afficher dans le graphique (voir plus bas pour les exemple, ou les fichiers Excel d'exemples dans le dossier /Data).  
+
+2) Importer la fonction dans R avec une fonction `source()` (c'est l'équivalent d'un `library()`)  
+
+3) Créer un 1er graphique  
+
+
+::: {.callout-tip title="Astuces :" collapse="false"}
+
+
+- Vous pouvez modifier les données pour changer le graphique. En-bas de fiches : des solutions faciles pour recoder des modalités, et changer les ordres.  
+- Pour les personnes qui maitrisent ggplot2, vous pouvez modifier les graphiques en les enregistrant dans un objet R, puis en ajoutant les lignes de codes ggplot2 voulues.  
+
+:::
+
+
+
+::: {.callout-warning title="Attention :" collapse="false"}
+
+Pour l'instant, l'affichage du graphique est trompeur dans Rstudio et ne correspond pas au graphique en sortie.   
+Il faut toujours le sauvegarder au format .svg pour pouvoir l'observer en taille réelle.  
+
+
+:::
+
+4) Sauvegarder le graphique avec `ined_export()` pour avoir une visualisation du graphique dans le format du livre.  
+
+5) Pour voir le graphique final : soit ouvrir avec Inkscape, soit en cliquant-glissant l'image dans un document Word.
+
+
+
+# Export des graphiques
+
+## Fonction ined_export()
+
+
+### Arguments 
+
+- **graph :** (obligatoire) Un objet `ggplot2` issue d'une des fonctions de graphiques.  
+
+- **format :** taille du graphique.  
+
+  - "petit" : Pour un graphique de 9,23cm x 8cm   
+  - "moyen" : Pour un graphique de 18,97cm x 8cm     
+  - "grand" : Pour un graphique de 18,97cm x 20,33 cm  
+
+
+- **nomfichier :** une chaîne de caractère avec le chemin et le nom du fichier à sauvegarder. (ex : "Sortie/mongraph")  
+
+
+### Exemple :
+
+Voir ci-dessous avec chaque graphique disponible.
+
+<br>
+
+
+
+# Graphiques en barres
+
+
+## Fonction ined_baton()
+
+
+
+
+
+### Données & Variables 
+
+
+- **donnees** : (obligatoire) Données à utiliser dans le graphique. Il s'agit de données agrégées dans le même format que les données de la section "Exemple", ci-dessous.  
+
+
+Pour tous les arguments ci-dessous, il est possible d'indiquer soit le nom (entre guillemets), soit la position (numéro de colonne) des variables.  
+
+- **var_y** : (obligatoire) Variable numérique des valeurs. Il s'agit des quantités à représenter sur le graphique.  
+
+- **var_x** : (obligatoire) Variable à afficher sur l'axe X.  
+
+- **var_couleur** : Variable catégorielle qui détermine la couleur des barres.  
+
+- **var_facet** : Variable catégorielle qui crée des graphiques côte-à-côte pour chaque modalité d'une variable.  
+
+
+### Ordre des modalités et couleurs
+
+- **facet_disposition** : position des graphiques en facettes (avec l'argument : *var_facet*), sur des lignes, sur des colonnes, ou en carré/mosaïque.  
+  - *"colonne* : En colonne, l'un à côté de l'autre.  
+  - *"ligne"*  : En ligne, l'un au dessus de l'autre.  
+  - *"carre"*  : Disposition automatique, en carré. 
+
+
+- **var_x_ordre** : Ordre des modalités de la variable X.  
+  - *"base"* : Ordre présent dans les données renseignées dans *donnees*.  
+  - *"inverse"* : Inverse de l'ordre de la base.  
+  - *"alpha"* : Ordre alphabétique.  
+  - *"croissant"* : Modalités ordonnées dans l'ordre croissant des effectifs de chaque modalité de *var_x*.  
+
+
+- **var_couleur_ordre** : Ordre des modalités de la variable de couleurs, créée avec *var_couleur* (dans la légende et dans l'ordre des barres).  
+  - *"base"* : Ordre présent dans les données renseignées dans *donnees*.  
+  - *"inverse"* : Inverse de l'ordre de la base.  
+  - *"alpha"* : Ordre alphabétique.  
+
+- **palette** : Choix de la palette de couleurs  
+  - *"categorie"* : (défaut) Une palette avec 9 couleurs pour des variables catégorielles, sans hiérarchie.  
+  - *"genre"*     : Une palette avec 4 couleurs à utiliser pour visualiser les variables de genre    
+  - *"orange"*    : Une palette avec un dégradé de 7 orange pour les variables ordinales     
+  - *"violet"*    : Une palette avec un dégradé de 7 violet pour les variables ordinales       
+  - *"oppose"*    : Une palette qui va du violet au orange, et qui s'adapte au nombre de modalité (jusqu'à 8)     
+
+
+### Etiquettes 
+
+
+- **etiquette** : Afficher une étiquette de valeur sur les barres.  
+  - *"oui"* : Affiche toutes les étiquettes  
+  - *"max"* : Affiche uniquement la valeur maximale  
+  - *"non"* : Pas d'étiquettes  
+
+- **etiquette_min** : Valeur numérique minimale à partir de laquelle afficher les étiquettes.  
+
+- **etiquette_arrondi** : Nombre de chiffre après la virgule pour les étiquettes.   
+
+
+
+### Légende
+
+- **legende_position** : Position de la légende.  
+  - *A droite* : "right", "droite"  
+  - *En bas* : "bottom", "bas"  
+  - *A gauche* : "left", "gauche"  
+  - *En haut* : "top", "haut"  
+  - *Dans le graphique* : coordonnées de la position sur le graphique.  
+  &#x2192; Exemple : c(0.75, 0.33), pour placer le coin supérieur gauche de la légende en X = 0.75 et Y = 0.33  
+
+
+
+- **legende_ncol** : Nombre de colonnes sur lesquelles la légende est répartie.  
+
+- **legende_ordre** : "ligne" ou "colonne" ; Si la légende est disposée sur plusieurs colonnes, permet de changer l'ordre de lecture des modalités, pour les placer en ligne ou en colonne. 
+
+
+### Modification axes X et Y
+
+
+**Axe Y :**
+
+- **y_min** : Valeur minimale à afficher de l'axe Y  
+- **y_max** : Valeur maximale à afficher de l'axe Y  
+- **y_intervalle** : Intervalle entre les graduations de l'axe Y  
+- **y_pct** : TRUE / FALSE ; Si TRUE : l'échelle de l'axe Y affiche le symbole "%"  
+
+
+**Axe X :**
+- **var_x_angle** : Angle des modalités de l'axe X. 
+
+
+
+
+### Textes & Titres
+
+
+**Titres :**  
+
+- **titre** : Titre du graphique (entre guillemets)  
+- **titre_x** : Titre de l'axe X (entre guillemets)  
+- **titre_y** : Titre de l'axe Y (entre guillemets)  
+- **titre_legende** : Titre de la légende (entre guillemets)  
+
+
+**Nombre de caractères avant un saut de ligne :**  
+
+Si besoin en cas de textes trop longs.  
+
+- **ncarac_titre** : Pour le titre  
+- **ncarac_titre_x** : Pour le titre de l'axe X  
+- **ncarac_titre_y** : Pour le titre de l'axe Y  
+- **ncarac_titre_legende** : Pour le titre de la légende  
+- **ncarac_var_x** : Pour les modalités de l'axe X  
+- **ncarac_legende** : Pour les modalités de la légende  
+- **ncarac_facet** : Pour les modalités des facettes.  
+
+<br>
+
+
+
+## Exemple
+
+
+### Charger la fonction
+
+
+```{r}
+
+source("Programme/fonction_baton.R")
+
+```
+
+
+
+
+## Fonctionnement
+
+::: {.panel-tabset}
+
+
+### Une variable
+
+
+
+
+```{r}
+#| column: margin
+library(openxlsx)
+dt_barre = read.xlsx("Data/data_ex_barre.xlsx", sheet = 1)
+
+
+```
+
+```{r echo=FALSE}
+#| echo: false
+#| message: false
+#| warning: false
+#| column: margin
+
+library(kableExtra)
+kable(dt_barre) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"),full_width = T,font_size = 15) %>%
+  scroll_box(height = "250px")
+``` 
+
+
+
+```{r}
+#| message: false
+baton = ined_baton(
+    donnees = dt_barre,
+    var_y = "Valeur",
+    var_x = "Modalites",
+    etiquette = "oui",
+    etiquette_arrondi = 2,
+    var_x_ordre = "croissant",
+    y_min = 0,
+    y_max = 40,
+    y_intervalle = 5,
+    y_pct = TRUE,
+    var_x_angle = 45,
+    ncarac_var_x = 20)
+baton
+
+```
+
+
+
+
+::: {.callout-warning title="Sauvegarde :" collapse="false"}
+
+```{r}
+#| eval: false
+ined_export(baton, "petit", "Sortie/baton_petit")
+
+```
+
+:::
+
+
+
+### Deux variables
+
+
+```{r}
+#| column: margin
+library(openxlsx)
+dt_barre = read.xlsx("Data/data_ex_barre.xlsx",
+                     sheet = 2)
+
+```
+
+
+```{r echo=FALSE}
+#| echo: false
+#| message: false
+#| warning: false
+#| column: margin
+library(kableExtra)
+kable(dt_barre) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"),full_width = T,font_size = 15) %>%
+  scroll_box(height = "350px")
+``` 
+
+
+```{r}
+#| message: false
+baton = ined_baton(
+    donnees = dt_barre,
+    var_y = "Valeur",
+    var_x = "Lieu",
+        var_couleur = "Modalites",
+    
+    etiquette = "non",
+    var_x_ordre = "base",
+    
+    legende_position = c(0.25,0.75),
+    titre_x = "Lieu de rencontre",
+    
+    y_min = 0,
+    y_max = 50,
+    y_intervalle = 10,
+    y_pct = TRUE,
+    
+    var_x_angle = 90,
+    ncarac_var_x = 20,
+    ncarac_legende = 15
+    )
+baton
+
+```
+
+
+::: {.callout-warning title="Sauvegarde :" collapse="false"}
+
+```{r}
+#| eval: false
+
+ined_export(baton, "moyen", "Sortie/baton_moyen")
+
+```
+
+:::
+
+
+
+
+
+### Trois variables
+
+
+
+```{r}
+#| column: margin
+library(openxlsx)
+dt_barre = read.xlsx("Data/data_ex_barre.xlsx",
+                     sheet = 3)
+
+```
+
+
+```{r echo=FALSE}
+#| echo: false
+#| message: false
+#| warning: false
+#| column: margin
+library(kableExtra)
+kable(dt_barre) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"),full_width = T,font_size = 15) %>%
+  scroll_box(height = "350px")
+``` 
+
+
+
+```{r}
+#| message: false
+#| warning: false
+
+baton = ined_baton(
+    donnees = dt_barre,
+    var_y = "Valeur",
+    var_x = "Modalites",
+    var_couleur = "Lieu",
+    var_facet = "Relation",
+    facet_disposition = "ligne",
+    
+    palette = "oppose",
+    
+    etiquette = "max",
+    etiquette_arrondi = 1,
+
+    legende_position = "droite",
+
+    legende_ncol = 1,
+    
+    titre_legende = "Type de couples :",
+
+    y_pct = TRUE,
+    y_max = 70,
+    y_intervalle = 10,
+    
+    var_x_angle = 45,
+    
+    ncarac_titre = 50,
+    ncarac_titre_x = 35,
+    ncarac_var_x = 15,
+    ncarac_legende = 20,
+    ncarac_facet = 10)
+
+baton
+
+```
+
+
+::: {.callout-warning title="Sauvegarde :" collapse="false"}
+
+```{r}
+#| eval: false
+
+ined_export(baton, "moyen", "Sortie/baton_moyen")
+
+```
+
+:::
+
+
+
+
+:::
+
+
+
+
+
+
+
+<br>
+
+# Graphiques empilés
+
+
+## Fonction ined_empile()
+
+
+### Données & Variables 
+
+
+- **donnees** : (obligatoire) Données à utiliser dans le graphique. Il s'agit de données agrégées dans le même format que les données de la section "Exemple", ci-dessous.  
+
+
+Pour tous les arguments ci-dessous, il est possible d'indiquer soit le nom (entre guillemets), soit la position (numéro de colonne) des variables.  
+
+- **var_y** : (obligatoire) Variable numérique des valeurs. Il s'agit des quantités à représenter sur le graphique.  
+
+- **var_x** : (obligatoire) Variable à afficher sur l'axe X.  
+
+- **var_couleur** : Variable catégorielle qui détermine la couleur des barres.  
+
+- **var_facet** : Variable catégorielle qui crée des graphiques côte-à-côte pour chaque modalité d'une variable.  
+
+
+### Ordre des modalités et couleurs
+
+- **facet_disposition** : position des graphiques en facettes (avec l'argument : *var_facet*), sur des lignes, sur des colonnes, ou en carré/mosaïque.  
+  - *"colonne* : En colonne, l'un à côté de l'autre.  
+  - *"ligne"*  : En ligne, l'un au dessus de l'autre.  
+  - *"carre"*  : Disposition automatique, en carré. 
+
+- **barre_orient** : Orientation des barres empilées.  
+  - *"horizontal"* : (défaut) barres horizontales  
+  - *"vertical"* : barres verticales  
+
+
+- **var_x_ordre** : Ordre des modalités de la variable X.  
+  - *"base"* : Ordre présent dans les données renseignées dans *donnees*.  
+  - *"inverse"* : Inverse de l'ordre de la base.  
+  - *"alpha"* : Ordre alphabétique.  
+  - *"croissant"* : Modalités ordonnées dans l'ordre croissant des effectifs de chaque modalité de *var_x*.  
+
+
+- **var_couleur_ordre** : Ordre des modalités de la variable de couleurs, créée avec *var_couleur* (dans la légende et dans l'ordre des barres).  
+  - *"base"* : Ordre présent dans les données renseignées dans *donnees*.  
+  - *"inverse"* : Inverse de l'ordre de la base.  
+  - *"alpha"* : Ordre alphabétique.  
+
+- **palette** : Choix de la palette de couleurs  
+  - *"categorie"* : (défaut) Une palette avec 9 couleurs pour des variables catégorielles, sans hiérarchie.  
+  - *"genre"*     : Une palette avec 4 couleurs à utiliser pour visualiser les variables de genre    
+  - *"orange"*    : Une palette avec un dégradé de 7 orange pour les variables ordinales     
+  - *"violet"*    : Une palette avec un dégradé de 7 violet pour les variables ordinales       
+  - *"oppose"*    : Une palette qui va du violet au orange, et qui s'adapte au nombre de modalité (jusqu'à 8)     
+
+
+### Etiquettes 
+
+
+- **etiquette** : Afficher une étiquette de valeur sur les barres.  
+  - *"oui"* : Affiche toutes les étiquettes  
+  - *"max"* : Affiche uniquement la valeur maximale  
+  - *"non"* : Pas d'étiquettes  
+
+- **etiquette_min** : Valeur numérique minimale à partir de laquelle afficher les étiquettes.  
+
+- **etiquette_arrondi** : Nombre de chiffre après la virgule pour les étiquettes.   
+
+
+
+### Légende
+
+- **legende_position** : Position de la légende.  
+  - *A droite* : "right", "droite"  
+  - *En bas* : "bottom", "bas"  
+  - *A gauche* : "left", "gauche"  
+  - *En haut* : "top", "haut"  
+  - *Dans le graphique* : coordonnées de la position sur le graphique.  
+  &#x2192; Exemple : c(0.75, 0.33), pour placer le coin supérieur gauche de la légende en X = 0.75 et Y = 0.33  
+
+
+
+- **legende_ncol** : Nombre de colonnes sur lesquelles la légende est répartie.  
+
+- **legende_ordre** : "ligne" ou "colonne" ; Si la légende est disposée sur plusieurs colonnes, permet de changer l'ordre de lecture des modalités, pour les placer en ligne ou en colonne. 
+
+
+### Modification axes X et Y
+
+
+**Axe Y :**
+
+- **y_max** : Valeur maximale à afficher de l'axe Y  
+- **y_intervalle** : Intervalle entre les graduations de l'axe Y  
+- **y_pct** : TRUE / FALSE ; Si TRUE : l'échelle de l'axe Y affiche le symbole "%"  
+
+
+**Axe X :**  
+
+- **var_x_angle** : Angle des modalités de l'axe X. 
+
+
+
+
+### Textes & Titres
+
+
+**Titres :**  
+
+- **titre** : Titre du graphique (entre guillemets)  
+- **titre_x** : Titre de l'axe X (entre guillemets)  
+- **titre_y** : Titre de l'axe Y (entre guillemets)  
+- **titre_legende** : Titre de la légende (entre guillemets)  
+
+
+**Nombre de caractères avant un saut de ligne :**  
+
+Si besoin en cas de textes trop longs.  
+
+- **ncarac_titre** : Pour le titre  
+- **ncarac_titre_x** : Pour le titre de l'axe X  
+- **ncarac_titre_y** : Pour le titre de l'axe Y  
+- **ncarac_titre_legende** : Pour le titre de la légende  
+- **ncarac_var_x** : Pour les modalités de l'axe X  
+- **ncarac_legende** : Pour les modalités de la légende  
+- **ncarac_facet** : Pour les modalités des facettes.  
+
+<br>
+
+
+
+## Exemple
+
+
+### Charger la fonction
+
+
+```{r}
+
+source("Programme/fonction_empile.R")
+
+```
+
+
+
+
+## Fonctionnement
+
+::: {.panel-tabset}
+
+
+### Une variable
+
+
+
+
+```{r}
+#| column: margin
+library(openxlsx)
+dt_pct = read.xlsx("Data/data_ex_pct.xlsx", sheet = 1)
+
+
+```
+
+```{r echo=FALSE}
+#| echo: false
+#| message: false
+#| warning: false
+#| column: margin
+
+library(kableExtra)
+kable(dt_pct) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"),full_width = T,font_size = 15) %>%
+  scroll_box(height = "250px")
+``` 
+
+
+
+```{r}
+#| message: false
+empile = ined_empile(
+    donnees = dt_pct,
+    var_y = "Valeur",
+    var_x = "Modalites",
+    etiquette = "oui",
+    etiquette_arrondi = 2,
+    var_x_ordre = "croissant",
+    y_max = 70,
+    y_intervalle = 5,
+    y_pct = TRUE,
+    var_x_angle = 45,
+    ncarac_var_x = 20)
+empile
+
+```
+
+
+
+
+::: {.callout-warning title="Sauvegarde :" collapse="false"}
+
+```{r}
+#| eval: false
+ined_export(empile, "petit", "Sortie/empile_petit")
+
+```
+
+:::
+
+
+
+### Deux variables
+
+
+```{r}
+#| column: margin
+library(openxlsx)
+dt_pct = read.xlsx("Data/data_ex_pct.xlsx",
+                     sheet = 2)
+
+```
+
+
+```{r echo=FALSE}
+#| echo: false
+#| message: false
+#| warning: false
+#| column: margin
+library(kableExtra)
+kable(dt_pct) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"),full_width = T,font_size = 15) %>%
+  scroll_box(height = "350px")
+``` 
+
+
+```{r}
+#| message: false
+#| warning: false
+empile = ined_empile(
+    donnees = dt_pct,
+    var_y = "Valeur",
+    var_x = "Ages",
+    var_couleur = "Modalites",
+    var_x_ordre = "inverse",
+    var_couleur_ordre = "inverse",
+    
+    barre_orient = "vertical",
+    palette = "violet",
+    
+    etiquette = "oui",
+    etiquette_min = 5,
+    
+    legende_position = "droite",
+    legende_ncol = 1,
+    
+    y_max = 100,
+    y_intervalle = 10,
+    y_pct = TRUE,
+    
+    ncarac_var_x = 20,
+    ncarac_legende = 15
+    )
+empile
+
+```
+
+
+::: {.callout-warning title="Sauvegarde :" collapse="false"}
+
+```{r}
+#| eval: false
+
+ined_export(empile, "moyen", "Sortie/empile_moyen")
+
+```
+
+:::
+
+
+
+
+
+### Trois variables
+
+
+
+```{r}
+#| column: margin
+library(openxlsx)
+dt_pct = read.xlsx("Data/data_ex_pct.xlsx",
+                     sheet = 3)
+
+```
+
+
+```{r echo=FALSE}
+#| echo: false
+#| message: false
+#| warning: false
+#| column: margin
+library(kableExtra)
+kable(dt_pct) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"),full_width = T,font_size = 15) %>%
+  scroll_box(height = "350px")
+``` 
+
+
+
+```{r}
+#| message: false
+#| warning: false
+
+empile = ined_empile(
+    donnees = dt_pct,
+    var_y = 1,
+    var_x = 2,
+    var_couleur = 3,
+    var_facet = 4,
+    facet_disposition = "lignes",
+    barre_orient = "horizontal",     
+    
+    etiquette = "oui",
+    etiquette_min = 10,
+    etiquette_arrondi = 1,
+    
+    var_x_ordre = "inverse",
+    var_couleur_ordre = "inverse",
+    palette = "oppose",
+    
+    legende_position = "bas",
+    legende_ncol = 3,
+    legende_ordre = "colonne",
+    
+    titre = "",
+    titre_x = "",
+    titre_y = "",
+    titre_legende = "",
+    
+    y_max = NULL,
+    y_intervalle = 20,
+    y_pct = F,
+    
+    
+    var_x_angle = 45,
+    bg_color = "#FFF",
+    
+    ncarac_titre = 50,
+    ncarac_titre_x = 35,
+    ncarac_titre_y = 35,
+    ncarac_titre_legende = 30,
+    ncarac_var_x = 25,
+    ncarac_legende = 40,
+    ncarac_facet = 40
+)
+
+
+empile
+
+```
+
+
+::: {.callout-warning title="Sauvegarde :" collapse="false"}
+
+```{r}
+#| eval: false
+
+ined_export(empile, "moyen", "Sortie/empile_moyen")
+
+```
+
+:::
+
+
+:::
+
+
+
+
+
+
+
+
+
+<br>
+
+# Graphiques courbes
+
+
+## Fonction ined_courbe()
+
+
+### Données & Variables 
+
+
+- **donnees** : (obligatoire) Données à utiliser dans le graphique. Il s'agit de données agrégées dans le même format que les données de la section "Exemple", ci-dessous.  
+
+
+Pour tous les arguments ci-dessous, il est possible d'indiquer soit le nom (entre guillemets), soit la position (numéro de colonne) des variables.  
+
+- **var_y** : (obligatoire) Variable numérique des valeurs. Il s'agit des quantités à représenter sur le graphique.  
+
+- **var_x** : (obligatoire) Variable à afficher sur l'axe X.  
+
+- **var_couleur** : Variable catégorielle qui détermine la couleur des courbes  
+
+- **var_typeligne** : Variable catégorielle qui détermine le style des courbes (trait plein, pointillé, etc.)    
+
+- **var_facet** : Variable catégorielle qui crée des graphiques côte-à-côte pour chaque modalité d'une variable.  
+
+
+### Ordre des modalités et couleurs
+
+- **facet_disposition** : position des graphiques en facettes (avec l'argument : *var_facet*), sur des lignes, sur des colonnes, ou en carré/mosaïque.  
+  - *"colonne* : En colonne, l'un à côté de l'autre.  
+  - *"ligne"*  : En ligne, l'un au dessus de l'autre.  
+  - *"carre"*  : Disposition automatique, en carré. 
+
+- **barre_orient** : Orientation des barres empilées.  
+  - *"horizontal"* : (défaut) barres horizontales  
+  - *"vertical"* : barres verticales  
+
+
+- **var_x_ordre** : Ordre des modalités de la variable X.  
+  - *"base"* : Ordre présent dans les données renseignées dans *donnees*.  
+  - *"inverse"* : Inverse de l'ordre de la base.  
+  - *"alpha"* : Ordre alphabétique.  
+  - *"croissant"* : Modalités ordonnées dans l'ordre croissant des effectifs de chaque modalité de *var_x*.  
+  - *"decroissant"* : Modalités ordonnées dans l'ordre décroissant des effectifs de chaque modalité de *var_x*.  
+  - *"numerique"* : Pour les cas où les modalités de *var_x* sont numériques.  
+
+
+- **var_couleur_ordre** : Ordre des modalités de la variable de couleurs, créée avec *var_couleur* (dans la légende).  
+  - *"base"* : Ordre présent dans les données renseignées dans *donnees*.  
+  - *"inverse"* : Inverse de l'ordre de la base.  
+  - *"alpha"* : Ordre alphabétique.  
+
+
+- **var_typeligne_ordre** : Ordre des modalités de la variable de type de ligne, créée avec *var_typeligne* (dans la légende).  
+  - *"base"* : Ordre présent dans les données renseignées dans *donnees*.  
+  - *"inverse"* : Inverse de l'ordre de la base.  
+  - *"alpha"* : Ordre alphabétique.  
+
+
+- **lisser_courbe** : TRUE/FALSE : pour afficher des courbes lissées.  
+
+
+- **palette** : Choix de la palette de couleurs  
+  - *"categorie"* : (défaut) Une palette avec 9 couleurs pour des variables catégorielles, sans hiérarchie.  
+  - *"genre"*     : Une palette avec 4 couleurs à utiliser pour visualiser les variables de genre    
+  - *"orange"*    : Une palette avec un dégradé de 7 orange pour les variables ordinales     
+  - *"violet"*    : Une palette avec un dégradé de 7 violet pour les variables ordinales       
+  - *"oppose"*    : Une palette qui va du violet au orange, et qui s'adapte au nombre de modalité (jusqu'à 8)     
+
+
+- **style_courbe** : Un vecteur avec le type de trait à afficher pour chaque modalité de *var_typeligne*  
+  &#x2192; Exemple : c("solid", "dotted","dashed"), pour un trait plein, suivi de pointillé, suivi de tirets (voir les options de R)  
+
+
+
+
+### Légende
+
+- **legende_position** : Position de la légende.  
+  - *Dans la courbe* : "courbe"  
+  - *A droite* : "right", "droite"  
+  - *En bas* : "bottom", "bas"  
+  - *A gauche* : "left", "gauche"  
+  - *En haut* : "top", "haut"  
+  - *Dans le graphique* : coordonnées de la position sur le graphique.  
+  &#x2192; Exemple : c(0.75, 0.33), pour placer le coin supérieur gauche de la légende en X = 0.75 et Y = 0.33  
+
+
+- **legende_ncol_couleur** : Nombre de colonnes sur lesquelles la légende de la couleur est répartie.  
+- **legende_ncol_ligne** : Nombre de colonnes sur lesquelles la légende du type de ligne est répartie.  
+
+
+
+### Etiquettes 
+
+
+- **courbe_etiquette_position** : Position de l'étiquette à l'intérieur de la courbe (si légende = "courbe") :  
+  - *"ymax"* : Place le nom de la courbe à son maximum sur l'axe Y  
+  - *"ymid"* : Place le nom de la courbe à une position centrale sur l'axe Y    
+  - *"ymin"* : Place le nom de la courbe à son minimum sur l'axe Y  
+  - *"auto"* : Place automatiquement le nom de la courbe    
+  - Une valeur numérique entre 0 et 1 : Place le nom de la courbe à l'endroit voulu entre son début (0) et sa fin (1) 
+
+- **courbe_etiquette_lisser_intensite** : Un gradient de 0 à 100 qui lisse l'étiquette dans la courbe (si légende = "courbe")  
+
+
+
+
+### Modification axes X et Y
+
+
+**Axe Y :**
+
+- **y_min** : Valeur minimale à afficher de l'axe Y  
+- **y_max** : Valeur maximale à afficher de l'axe Y  
+- **y_intervalle** : Intervalle entre les graduations de l'axe Y  
+- **y_pct** : TRUE / FALSE ; Si TRUE : l'échelle de l'axe Y affiche le symbole "%"  
+
+
+**Axe X :**  
+
+- **x_intervalle** : Intervalle entre les graduations de l'axe X (si *var_x_ordre* = "numerique")  
+- **var_x_angle** : Angle des modalités de l'axe X. 
+
+
+
+
+### Textes & Titres
+
+
+**Titres :**  
+
+- **titre** : Titre du graphique (entre guillemets)  
+- **titre_x** : Titre de l'axe X (entre guillemets)  
+- **titre_y** : Titre de l'axe Y (entre guillemets)  
+- **titre_legende_couleur** : Titre de la légende de la variable de couleurs (entre guillemets)  
+- **titre_legende_ligne** : Titre de la légende de la variable de style de ligne (entre guillemets)  
+
+**Nombre de caractères avant un saut de ligne :**  
+
+Si besoin en cas de textes trop longs.  
+
+- **ncarac_titre** : Pour le titre  
+- **ncarac_titre_x** : Pour le titre de l'axe X  
+- **ncarac_titre_y** : Pour le titre de l'axe Y  
+- **ncarac_titre_legende_couleur** : Pour le titre de la légende de la variable de couleur  
+- **ncarac_titre_legende_ligne** : Pour le titre de la légende de la variable de style de ligne  
+- **ncarac_var_x** : Pour les modalités de l'axe X  
+- **ncarac_legende_couleur** : Pour les modalités de la variable de couleurs   
+- **ncarac_legende_ligne** : Pour les modalités de la variable de couleurs   
+- **ncarac_facet** : Pour les modalités des facettes.  
+
+<br>
+
+
+
+## Exemple
+
+
+### Charger la fonction
+
+
+```{r}
+
+source("Programme/fonction_courbe.R")
+
+```
+
+
+
+
+## Fonctionnement
+
+::: {.panel-tabset}
+
+
+### Une variable
+
+
+
+
+```{r}
+#| column: margin
+library(openxlsx)
+dt_courbe = read.xlsx("Data/data_ex_courbe.xlsx", sheet = 1)
+
+
+```
+
+```{r echo=FALSE}
+#| echo: false
+#| message: false
+#| warning: false
+#| column: margin
+
+library(kableExtra)
+kable(dt_courbe) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"),full_width = T,font_size = 15) %>%
+  scroll_box(height = "250px")
+``` 
+
+
+
+```{r}
+#| message: false
+courbe = ined_courbe(
+  donnee = dt_courbe,
+    var_y = "Valeur",
+    var_x = "Ages",
+  var_x_ordre = "numerique",
+  
+  palette      = "orange",
+  
+  y_pct = T,
+  y_min = 0,
+  y_max = 100,
+  y_intervalle = 20,
+  x_intervalle = 1,
+  
+  lisser_courbe = T,
+  
+  titre_x = "Âges au premier rapport sexuel",
+  ncarac_titre_x = 15
+)
+courbe
+
+```
+
+
+
+
+::: {.callout-warning title="Sauvegarde :" collapse="false"}
+
+```{r}
+#| eval: false
+ined_export(courbe, "petit", "Sortie/courbe_petit")
+
+```
+
+:::
+
+
+
+### Deux variables
+
+
+```{r}
+#| column: margin
+library(openxlsx)
+dt_courbe = read.xlsx("Data/data_ex_courbe.xlsx",
+                     sheet = 2)
+
+```
+
+
+```{r echo=FALSE}
+#| echo: false
+#| message: false
+#| warning: false
+#| column: margin
+library(kableExtra)
+kable(dt_courbe) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"),full_width = T,font_size = 15) %>%
+  scroll_box(height = "350px")
+``` 
+
+
+```{r}
+#| message: false
+#| warning: false
+
+courbe = ined_courbe(
+  donnee = dt_courbe,
+    var_y = "Valeur",
+    var_x = "Ages",
+    var_couleur = "Genre",
+  var_x_ordre = "numerique",
+  
+  legende_position = "bas",
+  legende_ncol_couleur = 2,
+  palette      = "genre",
+  
+  y_pct = T,
+  y_min = NULL,
+  y_max = 100,
+  y_intervalle = 20,
+  x_intervalle = 1,
+  
+  lisser_courbe = T,
+  
+  titre_x = "Âges au premier rapport sexuel",
+  ncarac_titre_x = 15
+)
+courbe
+
+```
+
+
+::: {.callout-warning title="Sauvegarde :" collapse="false"}
+
+```{r}
+#| eval: false
+
+ined_export(courbe, "petit", "Sortie/courbe_petit")
+
+```
+
+:::
+
+
+
+
+
+### Trois variables
+
+
+
+```{r}
+#| column: margin
+library(openxlsx)
+dt_courbe = read.xlsx("Data/data_ex_courbe.xlsx",
+                     sheet = 3)
+
+```
+
+
+```{r echo=FALSE}
+#| echo: false
+#| message: false
+#| warning: false
+#| column: margin
+library(kableExtra)
+kable(dt_courbe) %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped"),full_width = T,font_size = 15) %>%
+  scroll_box(height = "350px")
+``` 
+
+
+
+```{r}
+#| message: false
+#| warning: false
+
+courbe = ined_courbe(
+    donnees = dt_courbe,
+    var_y = "Valeur",
+    var_x = "Ages",
+    var_couleur = "Genre",
+    var_typeligne = "Groupe",
+    
+    var_x_ordre = "numerique",
+    x_intervalle = 2,
+    
+    palette      = "genre",
+    style_courbe = c("longdash","solid"),
+
+    y_pct = T,
+    lisser_courbe = F,
+    
+    legende_position = "courbe",
+
+    courbe_etiquette_position = "ymid",
+    courbe_etiquette_lisser_intensite = 60,
+)
+
+
+courbe
+
+```
+
+
+::: {.callout-warning title="Sauvegarde :" collapse="false"}
+
+```{r}
+#| eval: false
+
+ined_export(courbe, "moyen", "Sortie/courbe_moyen")
+
+```
+
+:::
+
+
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Astuce générales en R
+
+
+### Changer l'ordre des modalités
+
+
+Vous pouvez utiliser l'addins `iorder()` du package *questionr*.  
+Il s'agit d'une interface clique-bouton pour réordonner des modalités. 
+
+::: {.callout-warning title="Attention :" collapse="false"}
+
+Pour que le nouvel ordre soit pris en compte, il faut réordonner les données avec la fonction `arrange()` après avoir ordonnée la variable/
+
+```{r}
+#| eval: false
+
+iorder(data$ma_variable)
+data = arrange(data, ma_variable)
+
+```
+
+
+:::
+
+
+### Recoder une variable
+
+Pour recoder une variable, vous pouvez utilser l'addins `irec()` du package *questionr*.  
+Il s'agit d'une interface clique-bouton pour regrouper des modalités.  
+
+
+**Exemple :**
+
+```{r}
+#| eval: false
+
+questionr::irec()
+
+```
+
+
+
+
+
+
