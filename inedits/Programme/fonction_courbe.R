@@ -55,10 +55,12 @@ ined_courbe = function(
     ncarac_facet = 40,
     ncarac_var_x = 25,
     ncarac_legende_couleur = 40,
-    ncarac_legende_ligne = 40
-
-
+    ncarac_legende_ligne = 40,
     
+    export  = FALSE,
+    fichier = "graphique",
+    format = "moyen"
+
 
 ){
   
@@ -70,7 +72,7 @@ ined_courbe = function(
   
   ### GESTION LIBRARY        ----
   # Liste des packages à charger
-  packages <- c("tidyverse", "geomtextpath")
+  packages <- c("tidyverse", "geomtextpath", "magick")
   # Vérifier si les packages sont déjà installés
   missing_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
   # Installer les packages manquants
@@ -634,7 +636,66 @@ ined_courbe = function(
   
   
   
-  return(p)
+  
+  graph <<- p
+  
+  
+  ### EXPORT
+  
+  largeur = case_when(
+    format == "petit" ~ 9.23,
+    format == "moyen" ~ (9.23*2)+0.51,
+    format == "grand" ~ (9.23*2)+0.51
+  )
+  hauteur = case_when(
+    format == "petit" ~ 8.5,
+    format == "moyen" ~ 9.54, # Pourquoi ?
+    format == "grand" ~ 21.75
+  )
+  
+  extension = ".pdf"
+  
+  
+  if (export == TRUE) {
+    
+    extension = ".pdf"
+    ggsave(plot = p, 
+           filename = paste0(fichier,extension), 
+           device = cairo_pdf,
+           height = hauteur, 
+           width = largeur,
+           units = "cm")
+    
+    message("Fichier exporté ici : ", normalizePath(paste0(fichier,extension)))
+    
+    # Lecture avec magick
+    img <- image_read_pdf(paste0(fichier,extension))
+    suppressMessages(
+      invisible(capture.output(print(img)))
+    )
+    
+    
+  } else {
+    
+    #  Fichier temporaire
+    tmp_file <- tempfile(fileext = ".pdf")
+    
+    ggsave(plot = p, 
+           filename = tmp_file, 
+           device = cairo_pdf,
+           height = hauteur, 
+           width = largeur,
+           units = "cm")
+    
+    # Lecture avec magick
+    img <- image_read_pdf(tmp_file)
+    suppressMessages(
+      invisible(capture.output(print(img)))
+    )
+    
+    unlink(tmp_file)
+  }
+  
   
 }
 
