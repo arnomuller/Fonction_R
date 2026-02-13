@@ -98,7 +98,7 @@ ined_courbe = function(
   ################################
   ## Données                 ----
   
-  dt = donnees
+  dt = ungroup(donnees)
   
   if(is.numeric(var_y) == F){val_pos = which(colnames(dt) == var_y)} else {val_pos = var_y}
   if(is.numeric(var_x) == F){varX_pos = which(colnames(dt) == var_x)} else {varX_pos = var_x}
