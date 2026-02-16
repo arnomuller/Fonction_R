@@ -49,57 +49,40 @@ self-contained: true
 
 2) Importer la fonction dans R avec une fonction `source()` (c'est l'équivalent d'un `library()`)  
 
-3) Créer un 1er graphique  
-
-
-::: {.callout-tip title="Astuces :" collapse="false"}
-
-
-- Vous pouvez modifier les données pour changer le graphique. En-bas de fiches : des solutions faciles pour recoder des modalités, et changer les ordres.  
-- Pour les personnes qui maitrisent ggplot2, vous pouvez modifier les graphiques en les enregistrant dans un objet R, puis en ajoutant les lignes de codes ggplot2 voulues.  
-
-:::
-
+3) Créer le graphique voulu  
 
 
 ::: {.callout-warning title="Attention :" collapse="false"}
 
-Pour l'instant, l'affichage du graphique est trompeur dans Rstudio et ne correspond pas au graphique en sortie.   
-Il faut toujours le sauvegarder au format .svg pour pouvoir l'observer en taille réelle.  
+Il n'est plus nécessaire d'utiliser la fonction `ined_export()`, les fonctions de création de graphiques proposent désormais une option pour enregistrer directement les graphiques au format .pdf (voir plus bas), et elles affichent dans Rstudio la "vraie" version du graphique.
 
 
 :::
 
-4) Sauvegarder le graphique avec `ined_export()` pour avoir une visualisation du graphique dans le format du livre.  
 
-5) Pour voir le graphique final : soit ouvrir avec Inkscape, soit en cliquant-glissant l'image dans un document Word.
-
+4) Cliquer-glisser l'image .pdf dans la fiche  
 
 
-# Export des graphiques
 
-## Fonction ined_export()
-
-
-### Arguments 
-
-- **graph :** (obligatoire) Un objet `ggplot2` issue d'une des fonctions de graphiques.  
-
-- **format :** taille du graphique.  
-
-  - "petit" : Pour un graphique de 9,23cm x 8cm   
-  - "moyen" : Pour un graphique de 18,97cm x 8cm     
-  - "grand" : Pour un graphique de 18,97cm x 20,33 cm  
+::: {.callout-tip title="Astuces 1 :" collapse="false"}
 
 
-- **nomfichier :** une chaîne de caractère avec le chemin et le nom du fichier à sauvegarder. (ex : "Sortie/mongraph")  
+Vous pouvez modifier les données pour changer le graphique. En-bas de fiches : des solutions faciles pour recoder des modalités, et changer les ordres.  
 
 
-### Exemple :
+:::
 
-Voir ci-dessous avec chaque graphique disponible.
 
-<br>
+::: {.callout-tip title="Astuces 2 :" collapse="false"}
+
+
+Pour les personnes qui maitrisent ggplot2, les fonctions créée un objet, nommé `graph`, que vous pouvez modifier, en ajoutant les lignes de codes de ggplot2 voulues. Dans ce cas, la fonction `ined_export()` peut être utile pour sortir votre graphique modifié dans les bonnes dimensions.
+
+
+:::
+
+
+
 
 
 
@@ -107,8 +90,6 @@ Voir ci-dessous avec chaque graphique disponible.
 
 
 ## Fonction ined_baton()
-
-
 
 
 
@@ -155,6 +136,12 @@ Pour tous les arguments ci-dessous, il est possible d'indiquer soit le nom (entr
   - *"orange"*    : Une palette avec un dégradé de 7 orange pour les variables ordinales     
   - *"violet"*    : Une palette avec un dégradé de 7 violet pour les variables ordinales       
   - *"oppose"*    : Une palette qui va du violet au orange, et qui s'adapte au nombre de modalité (jusqu'à 8)     
+
+::: {.callout-note title="Inverser la palette"}
+
+Toutes les palettes peuvent être inversées en ajoutant le suffixe "_inv", par exemple : "oppose_inv" ou "categorie_inv". 
+
+:::
 
 
 ### Etiquettes 
@@ -228,6 +215,14 @@ Si besoin en cas de textes trop longs.
 - **ncarac_legende** : Pour les modalités de la légende  
 - **ncarac_facet** : Pour les modalités des facettes.  
 
+
+### Export 
+
+- [**export** : TRUE ou FALSE]{style="color:#b34b4f;"} ; si TRUE : enregistre l'image au format .pdf, si FALSE : affiche uniquement le graphique  
+- [**fichier** : chemin et nom du fichier .pdf à enregistrer]{style="color:#b34b4f;"}, par défaut "graphique".  
+- [**format** : "petit", "moyen", "grand"]{style="color:#b34b4f;"}, définit le format du graphique.  
+
+
 <br>
 
 
@@ -241,6 +236,9 @@ Si besoin en cas de textes trop longs.
 ```{r}
 
 source("Programme/fonction_baton.R")
+# ou depuis GitHub (dernière version)
+source("https://raw.githubusercontent.com/arnomuller/Fonction_R/refs/heads/main/inedits/Programme/fonction_baton.R")
+
 
 ```
 
@@ -262,7 +260,6 @@ source("Programme/fonction_baton.R")
 library(openxlsx)
 dt_barre = read.xlsx("Data/data_ex_barre.xlsx", sheet = 1)
 
-
 ```
 
 ```{r echo=FALSE}
@@ -281,7 +278,7 @@ kable(dt_barre) %>%
 
 ```{r}
 #| message: false
-baton = ined_baton(
+ined_baton(
     donnees = dt_barre,
     var_y = "Valeur",
     var_x = "Modalites",
@@ -293,24 +290,27 @@ baton = ined_baton(
     y_intervalle = 5,
     y_pct = TRUE,
     var_x_angle = 45,
-    ncarac_var_x = 20)
-baton
+    ncarac_var_x = 20,
+    
+    #Export
+    export  = TRUE,
+    fichier = "Sortie/barre_petit",
+    format = "petit"
+    
+    )
 
 ```
 
 
 
-
-::: {.callout-warning title="Sauvegarde :" collapse="false"}
-
-```{r}
-#| eval: false
-ined_export(baton, "petit", "Sortie/baton_petit")
+```{r error=FALSE, message=FALSE, echo=FALSE}
+library(magick)
+img = image_read_pdf("Sortie/barre_petit.pdf") |>
+  image_write("Sortie/png/temp0.png")
 
 ```
 
-:::
-
+![](Sortie/png/temp0.png){width=60%}
 
 
 ### Deux variables
@@ -339,7 +339,7 @@ kable(dt_barre) %>%
 
 ```{r}
 #| message: false
-baton = ined_baton(
+ined_baton(
     donnees = dt_barre,
     var_y = "Valeur",
     var_x = "Lieu",
@@ -358,26 +358,25 @@ baton = ined_baton(
     
     var_x_angle = 90,
     ncarac_var_x = 20,
-    ncarac_legende = 15
+    ncarac_legende = 15,
+    
+    #Export
+    export  = TRUE,
+    fichier = "Sortie/barre_moyen",
+    format = "moyen"
     )
-baton
+
 
 ```
 
 
-::: {.callout-warning title="Sauvegarde :" collapse="false"}
-
-```{r}
-#| eval: false
-
-ined_export(baton, "moyen", "Sortie/baton_moyen")
+```{r error=FALSE, message=FALSE, echo=FALSE}
+img = image_read_pdf("Sortie/barre_moyen.pdf") |>
+  image_write("Sortie/png/temp1.png")
 
 ```
 
-:::
-
-
-
+![](Sortie/png/temp1.png)
 
 
 ### Trois variables
@@ -410,7 +409,7 @@ kable(dt_barre) %>%
 #| message: false
 #| warning: false
 
-baton = ined_baton(
+ined_baton(
     donnees = dt_barre,
     var_y = "Valeur",
     var_x = "Modalites",
@@ -439,24 +438,26 @@ baton = ined_baton(
     ncarac_titre_x = 35,
     ncarac_var_x = 15,
     ncarac_legende = 20,
-    ncarac_facet = 10)
+    ncarac_facet = 10,
+    
+    #Export
+    export  = TRUE,
+    fichier = "Sortie/barre_moyen",
+    format = "moyen"
+    )
 
-baton
-
-```
-
-
-::: {.callout-warning title="Sauvegarde :" collapse="false"}
-
-```{r}
-#| eval: false
-
-ined_export(baton, "moyen", "Sortie/baton_moyen")
 
 ```
 
-:::
 
+
+```{r error=FALSE, message=FALSE, echo=FALSE}
+img = image_read_pdf("Sortie/barre_moyen.pdf") |>
+  image_write("Sortie/png/temp2.png")
+
+```
+
+![](Sortie/png/temp2.png)
 
 
 
@@ -523,6 +524,13 @@ Pour tous les arguments ci-dessous, il est possible d'indiquer soit le nom (entr
   - *"orange"*    : Une palette avec un dégradé de 7 orange pour les variables ordinales     
   - *"violet"*    : Une palette avec un dégradé de 7 violet pour les variables ordinales       
   - *"oppose"*    : Une palette qui va du violet au orange, et qui s'adapte au nombre de modalité (jusqu'à 8)     
+
+::: {.callout-note title="Inverser la palette"}
+
+Toutes les palettes peuvent être inversées en ajoutant le suffixe "_inv", par exemple : "oppose_inv" ou "categorie_inv". 
+
+:::
+
 
 
 ### Etiquettes 
@@ -596,6 +604,15 @@ Si besoin en cas de textes trop longs.
 - **ncarac_legende** : Pour les modalités de la légende  
 - **ncarac_facet** : Pour les modalités des facettes.  
 
+
+### Export 
+
+- [**export** : TRUE ou FALSE]{style="color:#b34b4f;"} ; si TRUE : enregistre l'image au format .pdf, si FALSE : affiche uniquement le graphique  
+- [**fichier** : chemin et nom du fichier .pdf à enregistrer]{style="color:#b34b4f;"}, par défaut "graphique".  
+- [**format** : "petit", "moyen", "grand"]{style="color:#b34b4f;"}, définit le format du graphique.  
+
+
+
 <br>
 
 
@@ -609,6 +626,9 @@ Si besoin en cas de textes trop longs.
 ```{r}
 
 source("Programme/fonction_empile.R")
+# ou depuis GitHub (dernière version)
+source("https://raw.githubusercontent.com/arnomuller/Fonction_R/refs/heads/main/inedits/Programme/fonction_empile.R")
+
 
 ```
 
@@ -649,34 +669,39 @@ kable(dt_pct) %>%
 
 ```{r}
 #| message: false
-empile = ined_empile(
-    donnees = dt_pct,
-    var_y = "Valeur",
-    var_x = "Modalites",
-    etiquette = "oui",
-    etiquette_arrondi = 2,
-    var_x_ordre = "croissant",
-    y_max = 70,
-    y_intervalle = 5,
-    y_pct = TRUE,
-    var_x_angle = 45,
-    ncarac_var_x = 20)
-empile
+ined_empile(
+  donnees = dt_pct,
+  var_y = "Valeur",
+  var_x = "Modalites",
+  etiquette = "oui",
+  etiquette_arrondi = 2,
+  var_x_ordre = "croissant",
+  y_max = 70,
+  y_intervalle = 5,
+  y_pct = TRUE,
+  var_x_angle = 45,
+  ncarac_var_x = 20,
+  
+  #Export
+  export  = TRUE,
+  fichier = "Sortie/empile_petit",
+  format = "petit"
+  
+)
 
 ```
 
 
-
-
-::: {.callout-warning title="Sauvegarde :" collapse="false"}
-
-```{r}
-#| eval: false
-ined_export(empile, "petit", "Sortie/empile_petit")
+```{r error=FALSE, message=FALSE, echo=FALSE}
+library(magick)
+img = image_read_pdf("Sortie/empile_petit.pdf") |>
+  image_write("Sortie/png/temp0b.png")
 
 ```
 
-:::
+![](Sortie/png/temp0b.png){width=60%}
+
+
 
 
 
@@ -707,46 +732,47 @@ kable(dt_pct) %>%
 ```{r}
 #| message: false
 #| warning: false
-empile = ined_empile(
-    donnees = dt_pct,
-    var_y = "Valeur",
-    var_x = "Ages",
-    var_couleur = "Modalites",
-    var_x_ordre = "inverse",
-    var_couleur_ordre = "inverse",
-    
-    barre_orient = "vertical",
-    palette = "violet",
-    
-    etiquette = "oui",
-    etiquette_min = 5,
-    
-    legende_position = "droite",
-    legende_ncol = 1,
-    
-    y_max = 100,
-    y_intervalle = 10,
-    y_pct = TRUE,
-    
-    ncarac_var_x = 20,
-    ncarac_legende = 15
-    )
-empile
+ined_empile(
+  donnees = dt_pct,
+  var_y = "Valeur",
+  var_x = "Ages",
+  var_couleur = "Modalites",
+  var_x_ordre = "inverse",
+  var_couleur_ordre = "inverse",
+  
+  barre_orient = "vertical",
+  palette = "violet",
+  
+  etiquette = "oui",
+  etiquette_min = 5,
+  
+  legende_position = "droite",
+  legende_ncol = 1,
+  
+  y_max = 100,
+  y_intervalle = 10,
+  y_pct = TRUE,
+  
+  ncarac_var_x = 20,
+  ncarac_legende = 15,
+  
+  #Export
+  export  = TRUE,
+  fichier = "Sortie/empile_moyen",
+  format = "moyen"
+  
+)
 
 ```
 
 
-::: {.callout-warning title="Sauvegarde :" collapse="false"}
-
-```{r}
-#| eval: false
-
-ined_export(empile, "moyen", "Sortie/empile_moyen")
+```{r error=FALSE, message=FALSE, echo=FALSE}
+img = image_read_pdf("Sortie/empile_moyen.pdf") |>
+  image_write("Sortie/png/temp1b.png")
 
 ```
 
-:::
-
+![](Sortie/png/temp1b.png)
 
 
 
@@ -781,73 +807,67 @@ kable(dt_pct) %>%
 #| message: false
 #| warning: false
 
-empile = ined_empile(
-    donnees = dt_pct,
-    var_y = 1,
-    var_x = 2,
-    var_couleur = 3,
-    var_facet = 4,
-    facet_disposition = "lignes",
-    barre_orient = "horizontal",     
-    
-    etiquette = "oui",
-    etiquette_min = 10,
-    etiquette_arrondi = 1,
-    
-    var_x_ordre = "inverse",
-    var_couleur_ordre = "inverse",
-    palette = "oppose",
-    
-    legende_position = "bas",
-    legende_ncol = 3,
-    legende_ordre = "colonne",
-    
-    titre = "",
-    titre_x = "",
-    titre_y = "",
-    titre_legende = "",
-    
-    y_max = NULL,
-    y_intervalle = 20,
-    y_pct = F,
-    
-    
-    var_x_angle = 45,
-    bg_color = "#FFF",
-    
-    ncarac_titre = 50,
-    ncarac_titre_x = 35,
-    ncarac_titre_y = 35,
-    ncarac_titre_legende = 30,
-    ncarac_var_x = 25,
-    ncarac_legende = 40,
-    ncarac_facet = 40
+ined_empile(
+  donnees = dt_pct,
+  var_y = 1,
+  var_x = 2,
+  var_couleur = 3,
+  var_facet = 4,
+  facet_disposition = "lignes",
+  barre_orient = "horizontal",     
+  
+  etiquette = "oui",
+  etiquette_min = 10,
+  etiquette_arrondi = 1,
+  
+  var_x_ordre = "inverse",
+  var_couleur_ordre = "inverse",
+  palette = "oppose",
+  
+  legende_position = "bas",
+  legende_ncol = 3,
+  legende_ordre = "colonne",
+  
+  titre = "",
+  titre_x = "",
+  titre_y = "",
+  titre_legende = "",
+  
+  y_max = NULL,
+  y_intervalle = 20,
+  y_pct = F,
+  
+  
+  var_x_angle = 45,
+  bg_color = "#FFF",
+  
+  ncarac_titre = 50,
+  ncarac_titre_x = 35,
+  ncarac_titre_y = 35,
+  ncarac_titre_legende = 30,
+  ncarac_var_x = 25,
+  ncarac_legende = 40,
+  ncarac_facet = 40,
+  
+  #Export
+  export  = TRUE,
+  fichier = "Sortie/empile_moyen",
+  format = "moyen"
+  
 )
 
-
-empile
-
 ```
 
 
-::: {.callout-warning title="Sauvegarde :" collapse="false"}
-
-```{r}
-#| eval: false
-
-ined_export(empile, "moyen", "Sortie/empile_moyen")
+```{r error=FALSE, message=FALSE, echo=FALSE}
+img = image_read_pdf("Sortie/empile_moyen.pdf") |>
+  image_write("Sortie/png/temp2b.png")
 
 ```
 
+![](Sortie/png/temp2b.png)
+
 :::
-
-
-:::
-
-
-
-
-
 
 
 
@@ -921,6 +941,14 @@ Pour tous les arguments ci-dessous, il est possible d'indiquer soit le nom (entr
   - *"orange"*    : Une palette avec un dégradé de 7 orange pour les variables ordinales     
   - *"violet"*    : Une palette avec un dégradé de 7 violet pour les variables ordinales       
   - *"oppose"*    : Une palette qui va du violet au orange, et qui s'adapte au nombre de modalité (jusqu'à 8)     
+
+
+::: {.callout-note title="Inverser la palette"}
+
+Toutes les palettes peuvent être inversées en ajoutant le suffixe "_inv", par exemple : "oppose_inv" ou "categorie_inv". 
+
+:::
+
 
 
 - **style_courbe** : Un vecteur avec le type de trait à afficher pour chaque modalité de *var_typeligne*  
@@ -1005,6 +1033,13 @@ Si besoin en cas de textes trop longs.
 - **ncarac_legende_ligne** : Pour les modalités de la variable de couleurs   
 - **ncarac_facet** : Pour les modalités des facettes.  
 
+### Export 
+
+- [**export** : TRUE ou FALSE]{style="color:#b34b4f;"} ; si TRUE : enregistre l'image au format .pdf, si FALSE : affiche uniquement le graphique  
+- [**fichier** : chemin et nom du fichier .pdf à enregistrer]{style="color:#b34b4f;"}, par défaut "graphique".  
+- [**format** : "petit", "moyen", "grand"]{style="color:#b34b4f;"}, définit le format du graphique.  
+
+
 <br>
 
 
@@ -1018,6 +1053,9 @@ Si besoin en cas de textes trop longs.
 ```{r}
 
 source("Programme/fonction_courbe.R")
+# ou depuis GitHub (dernière version)
+source("https://raw.githubusercontent.com/arnomuller/Fonction_R/refs/heads/main/inedits/Programme/fonction_courbe.R")
+
 
 ```
 
@@ -1058,10 +1096,10 @@ kable(dt_courbe) %>%
 
 ```{r}
 #| message: false
-courbe = ined_courbe(
+ined_courbe(
   donnee = dt_courbe,
-    var_y = "Valeur",
-    var_x = "Ages",
+  var_y = "Valeur",
+  var_x = "Ages",
   var_x_ordre = "numerique",
   
   palette      = "orange",
@@ -1075,25 +1113,26 @@ courbe = ined_courbe(
   lisser_courbe = T,
   
   titre_x = "Âges au premier rapport sexuel",
-  ncarac_titre_x = 15
+  ncarac_titre_x = 15,
+  
+  #Export
+  export  = TRUE,
+  fichier = "Sortie/courbe_petit",
+  format = "petit"
+  
 )
-courbe
 
 ```
 
 
-
-
-::: {.callout-warning title="Sauvegarde :" collapse="false"}
-
-```{r}
-#| eval: false
-ined_export(courbe, "petit", "Sortie/courbe_petit")
+```{r error=FALSE, message=FALSE, echo=FALSE}
+library(magick)
+img = image_read_pdf("Sortie/courbe_petit.pdf") |>
+  image_write("Sortie/png/temp0c.png")
 
 ```
 
-:::
-
+![](Sortie/png/temp0c.png){width=60%}
 
 
 ### Deux variables
@@ -1124,11 +1163,11 @@ kable(dt_courbe) %>%
 #| message: false
 #| warning: false
 
-courbe = ined_courbe(
+ined_courbe(
   donnee = dt_courbe,
-    var_y = "Valeur",
-    var_x = "Ages",
-    var_couleur = "Genre",
+  var_y = "Valeur",
+  var_x = "Ages",
+  var_couleur = "Genre",
   var_x_ordre = "numerique",
   
   legende_position = "bas",
@@ -1144,26 +1183,26 @@ courbe = ined_courbe(
   lisser_courbe = T,
   
   titre_x = "Âges au premier rapport sexuel",
-  ncarac_titre_x = 15
+  ncarac_titre_x = 15,
+  
+  #Export
+  export  = TRUE,
+  fichier = "Sortie/courbe_petit",
+  format = "petit"
+  
 )
-courbe
 
 ```
 
 
-::: {.callout-warning title="Sauvegarde :" collapse="false"}
-
-```{r}
-#| eval: false
-
-ined_export(courbe, "petit", "Sortie/courbe_petit")
+```{r error=FALSE, message=FALSE, echo=FALSE}
+library(magick)
+img = image_read_pdf("Sortie/courbe_petit.pdf") |>
+  image_write("Sortie/png/temp1c.png")
 
 ```
 
-:::
-
-
-
+![](Sortie/png/temp1c.png){width=60%}
 
 
 ### Trois variables
@@ -1196,45 +1235,45 @@ kable(dt_courbe) %>%
 #| message: false
 #| warning: false
 
-courbe = ined_courbe(
-    donnees = dt_courbe,
-    var_y = "Valeur",
-    var_x = "Ages",
-    var_couleur = "Genre",
-    var_typeligne = "Groupe",
-    
-    var_x_ordre = "numerique",
-    x_intervalle = 2,
-    
-    palette      = "genre",
-    style_courbe = c("longdash","solid"),
-
-    y_pct = T,
-    lisser_courbe = F,
-    
-    legende_position = "courbe",
-
-    courbe_etiquette_position = "ymid",
-    courbe_etiquette_lisser_intensite = 60,
+ined_courbe(
+  donnees = dt_courbe,
+  var_y = "Valeur",
+  var_x = "Ages",
+  var_couleur = "Genre",
+  var_typeligne = "Groupe",
+  
+  var_x_ordre = "numerique",
+  x_intervalle = 2,
+  
+  palette      = "genre",
+  style_courbe = c("longdash","solid"),
+  
+  y_pct = T,
+  lisser_courbe = F,
+  
+  legende_position = "courbe",
+  
+  courbe_etiquette_position = "ymid",
+  courbe_etiquette_lisser_intensite = 60,
+  
+  #Export
+  export  = TRUE,
+  fichier = "Sortie/courbe_moyen",
+  format = "moyen"
+  
 )
 
-
-courbe
-
 ```
 
 
-::: {.callout-warning title="Sauvegarde :" collapse="false"}
-
-```{r}
-#| eval: false
-
-ined_export(courbe, "moyen", "Sortie/courbe_moyen")
+```{r error=FALSE, message=FALSE, echo=FALSE}
+library(magick)
+img = image_read_pdf("Sortie/courbe_moyen.pdf") |>
+  image_write("Sortie/png/temp2c.png")
 
 ```
 
-:::
-
+![](Sortie/png/temp2c.png)
 
 :::
 
@@ -1245,8 +1284,44 @@ ined_export(courbe, "moyen", "Sortie/courbe_moyen")
 
 
 
+# Export des graphiques
 
 
+::: {.callout-warning title="Attention :" collapse="false"}
+
+L'export se fait directement depuis les fonctions de création de graphiques, la fonction `ined_export()` n'est a utiliser que pour exporter des graphiques que vous aurez modifiez dans R.
+
+Pour cela, vous pouvez repartir de l'objet ggplot2 nommé *graph*, produit par les fonctions.
+
+
+:::
+
+
+## Fonction ined_export()
+
+
+### Arguments 
+
+- **graph :** (obligatoire) Un objet `ggplot2` issue d'une des fonctions de graphiques.  
+
+- **format :** taille du graphique.  
+
+  - "petit" : Pour un graphique de 9,23cm x 8cm   
+  - "moyen" : Pour un graphique de 18,97cm x 8cm     
+  - "grand" : Pour un graphique de 18,97cm x 20,33 cm  
+
+
+- **fichier :** une chaîne de caractère avec le chemin et le nom du fichier à sauvegarder. (ex : "Sortie/mongraph")  
+
+
+
+### Exemple :
+
+```{r, eval=FALSE}
+ined_export(graph = graph,
+            fichier = "Sortie/graphique",
+            format = "moyen")
+```
 
 
 
