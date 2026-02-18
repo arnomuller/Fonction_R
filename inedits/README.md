@@ -1,5 +1,5 @@
 
-Documentation ici : <https://arnomuller.github.io/Inedits_Doc.html>  
+Documentation ici : <https://arnomuller.github.io/INEDits_Doc.html>  
 
 Pour appeler les fonctions :  
 
