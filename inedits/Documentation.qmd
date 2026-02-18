@@ -54,13 +54,13 @@ self-contained: true
 
 ::: {.callout-warning title="Attention :" collapse="false"}
 
-Il n'est plus nécessaire d'utiliser la fonction `ined_export()`, les fonctions de création de graphiques proposent désormais une option pour enregistrer directement les graphiques au format .pdf (voir plus bas), et elles affichent dans Rstudio la "vraie" version du graphique.
+Il n'est plus nécessaire d'utiliser la fonction `ined_export()`, les fonctions de création de graphiques proposent désormais une option pour enregistrer directement les graphiques au format .pdf et .svg (voir plus bas), et elles affichent dans Rstudio la "vraie" version du graphique.
 
 
 :::
 
 
-4) Cliquer-glisser l'image .pdf dans la fiche  
+4) Cliquer-glisser l'image .svg dans la fiche  
 
 
 
@@ -218,8 +218,8 @@ Si besoin en cas de textes trop longs.
 
 ### Export 
 
-- [**export** : TRUE ou FALSE]{style="color:#b34b4f;"} ; si TRUE : enregistre l'image au format .pdf, si FALSE : affiche uniquement le graphique  
-- [**fichier** : chemin et nom du fichier .pdf à enregistrer]{style="color:#b34b4f;"}, par défaut "graphique".  
+- [**export** : TRUE ou FALSE]{style="color:#b34b4f;"} ; si TRUE : enregistre l'image aux formats .pdf et .svg, si FALSE : affiche uniquement le graphique  
+- [**fichier** : chemin et nom du fichier à enregistrer]{style="color:#b34b4f;"}, par défaut "graphique".  
 - [**format** : "petit", "moyen", "grand"]{style="color:#b34b4f;"}, définit le format du graphique.  
 
 
@@ -607,8 +607,8 @@ Si besoin en cas de textes trop longs.
 
 ### Export 
 
-- [**export** : TRUE ou FALSE]{style="color:#b34b4f;"} ; si TRUE : enregistre l'image au format .pdf, si FALSE : affiche uniquement le graphique  
-- [**fichier** : chemin et nom du fichier .pdf à enregistrer]{style="color:#b34b4f;"}, par défaut "graphique".  
+- [**export** : TRUE ou FALSE]{style="color:#b34b4f;"} ; si TRUE : enregistre l'image au format .pdf et .svg, si FALSE : affiche uniquement le graphique  
+- [**fichier** : chemin et nom du fichier à enregistrer]{style="color:#b34b4f;"}, par défaut "graphique".  
 - [**format** : "petit", "moyen", "grand"]{style="color:#b34b4f;"}, définit le format du graphique.  
 
 
@@ -898,6 +898,13 @@ Pour tous les arguments ci-dessous, il est possible d'indiquer soit le nom (entr
 
 - **var_facet** : Variable catégorielle qui crée des graphiques côte-à-côte pour chaque modalité d'une variable.  
 
+- [**type_graph** : Type de graphiques :]{style="color:#b34b4f;"}  
+  - [*"courbes"*  : faire apparaître uniquement les courbes]{style="color:#b34b4f;"}  
+  - [*"courbes+points"*  : faire apparaître des courbes et des points]{style="color:#b34b4f;"}  
+  - [*"points"*  : faire apparaître uniquement les points]{style="color:#b34b4f;"}   
+  
+  
+
 
 ### Ordre des modalités et couleurs
 
@@ -957,6 +964,24 @@ Toutes les palettes peuvent être inversées en ajoutant le suffixe "_inv", par 
 
 
 
+### Etiquettes des points
+
+
+
+- [**etiquette** : Afficher une étiquette de valeur sur les barres.]{style="color:#b34b4f;"}  
+  
+  - [*"oui"* : Affiche toutes les étiquettes]{style="color:#b34b4f;"}  
+  - [*"max"* : Affiche uniquement les valeurs maximales]{style="color:#b34b4f;"}  
+  - [*"min"* : Affiche uniquement les valeurs minimales]{style="color:#b34b4f;"}  
+  - [*"non"* : Pas d'étiquettes]{style="color:#b34b4f;"}  
+  
+
+- [**etiquette_min** : Valeur numérique minimale à partir de laquelle afficher les étiquettes.]{style="color:#b34b4f;"}  
+
+- [**etiquette_arrondi** : Nombre de chiffre après la virgule pour les étiquettes.]{style="color:#b34b4f;"}   
+
+
+
 ### Légende
 
 - **legende_position** : Position de la légende.  
@@ -970,11 +995,8 @@ Toutes les palettes peuvent être inversées en ajoutant le suffixe "_inv", par 
 
 
 - **legende_ncol_couleur** : Nombre de colonnes sur lesquelles la légende de la couleur est répartie.  
+
 - **legende_ncol_ligne** : Nombre de colonnes sur lesquelles la légende du type de ligne est répartie.  
-
-
-
-### Etiquettes 
 
 
 - **courbe_etiquette_position** : Position de l'étiquette à l'intérieur de la courbe (si légende = "courbe") :  
@@ -1035,8 +1057,8 @@ Si besoin en cas de textes trop longs.
 
 ### Export 
 
-- [**export** : TRUE ou FALSE]{style="color:#b34b4f;"} ; si TRUE : enregistre l'image au format .pdf, si FALSE : affiche uniquement le graphique  
-- [**fichier** : chemin et nom du fichier .pdf à enregistrer]{style="color:#b34b4f;"}, par défaut "graphique".  
+- [**export** : TRUE ou FALSE]{style="color:#b34b4f;"} ; si TRUE : enregistre l'image au format .pdf et .svg, si FALSE : affiche uniquement le graphique  
+- [**fichier** : chemin et nom du fichier à enregistrer]{style="color:#b34b4f;"}, par défaut "graphique".  
 - [**format** : "petit", "moyen", "grand"]{style="color:#b34b4f;"}, définit le format du graphique.  
 
 

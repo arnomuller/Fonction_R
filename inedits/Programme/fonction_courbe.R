@@ -14,11 +14,23 @@ ined_courbe = function(
     var_typeligne = NULL,
     var_facet = NULL,
     
-    var_x_ordre = "inverse",
+    var_x_ordre = "base",
     var_couleur_ordre = "base",
     var_typeligne_ordre = "base",
     
     facet_disposition = "lignes",
+    
+    
+    
+    
+    # Changement pour doc
+    type_graph   = "courbes",
+    etiquette = "oui",
+    etiquette_min = -999,
+    etiquette_arrondi = 0,
+    
+    
+    
     palette      = "categorie",
     style_courbe = NULL,
 
@@ -72,7 +84,7 @@ ined_courbe = function(
   
   ### GESTION LIBRARY        ----
   # Liste des packages à charger
-  packages <- c("tidyverse", "geomtextpath", "magick")
+  packages <- c("tidyverse", "geomtextpath", "magick","ggrepel")
   # Vérifier si les packages sont déjà installés
   missing_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
   # Installer les packages manquants
@@ -148,15 +160,15 @@ ined_courbe = function(
   if(var_x_ordre == "base"){
     dt_plot = dt_plot |> 
       mutate(varX = str_wrap(varX, ncarac_var_x))|> 
-      mutate(varX = factor(varX, levels = rev(unique(as.character(varX)))))
+      mutate(varX = factor(varX, levels = unique(as.character(varX))))
   } else if(var_x_ordre == "inverse"){
     dt_plot = dt_plot |> 
       mutate(varX = str_wrap(varX, ncarac_var_x))|> 
-      mutate(varX = factor(varX, levels = unique(as.character(varX))))
+      mutate(varX = factor(varX, levels = rev(unique(as.character(varX)))))
   } else if(var_x_ordre == "alpha"){
     dt_plot = dt_plot |> 
       mutate(varX = str_wrap(varX, ncarac_var_x))|> 
-      mutate(varX = factor(varX, levels = rev(names(table(as.character(varX))))))
+      mutate(varX = factor(varX, levels = names(table(as.character(varX)))))
   } else if(var_x_ordre == "croissant"){
     dt_plot = dt_plot |> 
       mutate(varX = str_wrap(varX, ncarac_var_x))|> 
@@ -224,6 +236,52 @@ ined_courbe = function(
   } else {
     dt_plot = dt_plot |>
       mutate(facet = "Facet") 
+  }
+  
+  
+  
+  ## ETIQUETTE SUR POINTS
+  
+  if(etiquette %in% c("yes","oui",TRUE)){
+    
+    if(y_pct == T){
+      dt_plot = dt_plot |>
+        mutate(etiquette = ifelse(value > etiquette_min, paste0(round(value,etiquette_arrondi),"%"), NA))
+    }else{
+      dt_plot = dt_plot |>
+        mutate(etiquette = ifelse(value > etiquette_min, round(value,etiquette_arrondi), NA))
+    }
+    
+    
+  } else if (etiquette %in% c("max","maxi")){
+    
+    if(y_pct == T){
+      dt_plot = dt_plot |>
+        group_by(varX,facet)  |> 
+        mutate(etiquette = ifelse(value == max(value), paste0(round(value,etiquette_arrondi),"%"), NA))
+    }else{
+      dt_plot = dt_plot |>
+        group_by(varX,facet)  |> 
+        mutate(etiquette = ifelse(value == max(value), round(value,etiquette_arrondi), NA))
+    }
+    
+    
+  } else if (etiquette %in% c("min","mini")){
+    
+    if(y_pct == T){
+      dt_plot = dt_plot |>
+        group_by(varX,facet)  |> 
+        mutate(etiquette = ifelse(value == min(value), paste0(round(value,etiquette_arrondi),"%"), NA))
+    }else{
+      dt_plot = dt_plot |>
+        group_by(varX,facet)  |> 
+        mutate(etiquette = ifelse(value == min(value), round(value,etiquette_arrondi), NA))
+    }
+    
+    
+  } else {
+    dt_plot = dt_plot |>
+      mutate(etiquette = NA)
   }
   
   
@@ -499,10 +557,10 @@ ined_courbe = function(
   
   if(is.null(var_facet_pos) == F){
     
-    if (facet_disposition == "ligne") {
+    if (facet_disposition %in% c("ligne","lignes","row","rows")) {
       p = p +
         facet_grid(facet ~ ., scales = "free_y", space = "free_y", switch = "y") 
-    } else if (facet_disposition == "colonne"){
+    } else if (facet_disposition %in% c("colonne","colonnes","column","columns","col")){
       p = p +
         facet_grid(. ~ facet, scales = "free_y", space = "free_y", switch = "y") 
     } else {
@@ -527,6 +585,8 @@ ined_courbe = function(
   
   
   # Courbe
+  
+  
   
   if(any(legende_position != "courbe")){
     
@@ -589,7 +649,6 @@ ined_courbe = function(
   
   
   
-  
   # Type de lignes
   
   if(is.null(style_courbe) == F & is.null(var_ligne_pos) == F){
@@ -597,6 +656,57 @@ ined_courbe = function(
       scale_linetype_manual(values = style_courbe)
     
   }
+  
+  
+  
+  # Type de graphique
+  
+  if(type_graph %in% c("point+courbe",'points+courbe', "point+courbes", "points+courbes", 
+                       "point + courbe",'points + courbe', "point + courbes", "points + courbes",
+                       "point et courbe",'points et courbe', "point et courbes", "points et courbes",
+                       
+                       "courbe+point",'courbe+points', "courbes+point", "courbes+points", 
+                       "courbe + point",'courbe + points', "courbes + point", "courbes + points",
+                       "courbe et point",'courbe et points', "courbes et point", "courbes et points"
+                       
+                       )){
+    
+    
+    p = p + geom_point()
+    
+  } else if (type_graph %in% c("point",'points', "dot", "dots")){
+    
+    p = p + geom_point()
+    p$layers[[1]] <- NULL
+    
+    
+  } 
+  
+  
+  
+  # Etiquettes points
+  
+  if(etiquette %in% c("yes","oui",TRUE, "max", "maxi", "min", "mini")){
+    p = p +
+      geom_text_repel(aes(label = etiquette, y = value,
+                          color = couleur),
+                      direction = "y",
+                      bg.color = "white", 
+                      bg.r = 0.1 ,         
+                      xlim = c(NA, NA),
+                      ylim = c(NA, NA),
+                      min.segment.length = Inf,
+                      hjust = 0.5,
+                      vjust = 1,
+                      
+                      size = size_text/3,
+                      fontface = 2,
+                      position = position_dodge(width = 0.75),
+                      
+      ) 
+  }
+  
+  
   
   
   
@@ -666,7 +776,14 @@ ined_courbe = function(
            width = largeur,
            units = "cm")
     
-    message("Fichier exporté ici : ", normalizePath(paste0(fichier,extension)))
+    ggsave(plot = p, 
+           filename = paste0(fichier,".svg"), 
+           device = "svg",
+           height = hauteur, 
+           width = largeur,
+           units = "cm")
+    
+    message("Deux fichiers (svg + pdf) exportés ici : ", normalizePath(paste0(fichier)))
     
     # Lecture avec magick
     img <- image_read_pdf(paste0(fichier,extension))

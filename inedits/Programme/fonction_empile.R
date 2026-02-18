@@ -590,7 +590,14 @@ ined_empile = function(
            width = largeur,
            units = "cm")
     
-    message("Fichier exporté ici : ", normalizePath(paste0(fichier,extension)))
+    ggsave(plot = p, 
+           filename = paste0(fichier,".svg"), 
+           device = "svg",
+           height = hauteur, 
+           width = largeur,
+           units = "cm")
+    
+    message("Deux fichiers (svg + pdf) exportés ici : ", normalizePath(paste0(fichier)))
     
     # Lecture avec magick
     img <- image_read_pdf(paste0(fichier,extension))
