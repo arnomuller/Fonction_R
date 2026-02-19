@@ -1186,23 +1186,27 @@ kable(dt_courbe) %>%
 #| warning: false
 
 ined_courbe(
-  donnee = dt_courbe,
+  donnees = dt_courbe,
   var_y = "Valeur",
   var_x = "Ages",
   var_couleur = "Genre",
+  type_graph = "points",
+  
   var_x_ordre = "numerique",
+  var_couleur_ordre = "base",
+  
+  etiquette = "max",
+  
+  y_pct = F,
+  lisser_courbe = F,
   
   legende_position = "bas",
   legende_ncol_couleur = 2,
-  palette      = "genre",
   
-  y_pct = T,
   y_min = NULL,
   y_max = 100,
   y_intervalle = 20,
   x_intervalle = 1,
-  
-  lisser_courbe = T,
   
   titre_x = "Âges au premier rapport sexuel",
   ncarac_titre_x = 15,
