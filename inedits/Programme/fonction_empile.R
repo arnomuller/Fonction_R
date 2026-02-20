@@ -499,12 +499,12 @@ ined_empile = function(
   
   if(is.null(var_facet_pos) == F){
     
-    if (facet_disposition == "ligne") {
+    if (facet_disposition %in% c("ligne","lignes","row","rows")) {
       p = p +
-        facet_grid(facet ~ ., scales = "free_y", space = "free_y", switch = "y") 
-    } else if (facet_disposition == "colonne"){
+        facet_grid(facet ~ ., scales = "free", space = "free", switch = "y") 
+    } else if (facet_disposition %in% c("colonne","colonnes","column","columns")){
       p = p +
-        facet_grid(. ~ facet, scales = "free_y", space = "free_y", switch = "y") 
+        facet_grid(. ~ facet, scales = "free", space = "free", switch = "y") 
     } else {
       p = p +
         facet_wrap(vars(facet))
