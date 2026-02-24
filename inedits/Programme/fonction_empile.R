@@ -511,13 +511,16 @@ ined_empile = function(
     }
   }
   
-  if(barre_orient != "vertical"){
+  if(!barre_orient %in% c("vertical", "verticale", "verti")){
     if(is.null(y_max)){
       p = p + coord_flip(expand = T)
     } else {
       p = p + coord_flip(ylim = c(0,y_max), expand = T)
     }
   } else {
+    
+    p = p + guides(fill = guide_legend(reverse = FALSE))
+    
     if(is.null(y_max) == F){
       p = p + coord_cartesian(ylim = c(0,y_max))
     }
