@@ -707,6 +707,8 @@ ined_courbe = function(
                       hjust = 0.5,
                       vjust = 1,
                       
+                      force = 0.2,
+                      
                       size = size_text/3,
                       fontface = 2,
                       position = position_dodge(width = 0.75),
