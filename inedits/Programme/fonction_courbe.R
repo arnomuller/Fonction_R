@@ -452,8 +452,8 @@ ined_courbe = function(
     legend.key.height = unit(0.15, "cm"),
     # legend.spacing.y  = unit(-14, "pt"),
     # legend.spacing.x  = unit(-14, "pt"),
-    legend.margin   = margin(t = -8),
-    plot.margin     = margin(t = 5, r = 5, b = 3, l = 2),
+    legend.margin   = ggplot2::margin(t = -8),
+    plot.margin     = ggplot2::margin(t = 5, r = 5, b = 3, l = 2),
     
     
     panel.grid.minor.y=element_blank(),
