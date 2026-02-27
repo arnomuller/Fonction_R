@@ -25,7 +25,7 @@ ined_courbe = function(
     
     # Changement pour doc
     type_graph   = "courbes",
-    etiquette = "oui",
+    etiquette = "non",
     etiquette_min = -999,
     etiquette_arrondi = 0,
     
@@ -33,7 +33,7 @@ ined_courbe = function(
     
     palette      = "categorie",
     style_courbe = NULL,
-
+    
     legende_position = "bottom",
     legende_ncol_couleur = 1,
     legende_ncol_ligne = 1,
@@ -48,10 +48,10 @@ ined_courbe = function(
     bg_color = "#FFF",
     
     var_x_angle = 0,
-
+    
     courbe_etiquette_position = "ymax",
     courbe_etiquette_lisser_intensite = 20,
-
+    
     
     titre = "",
     titre_x = "",
@@ -72,8 +72,8 @@ ined_courbe = function(
     export  = FALSE,
     fichier = "graphique",
     format = "moyen"
-
-
+    
+    
 ){
   
   
@@ -83,6 +83,11 @@ ined_courbe = function(
   options(scipen=9999)
   
   ### GESTION LIBRARY        ----
+  
+  
+  ## Problèmes de marges avec une ancienne version de ggplot
+  
+  
   # Liste des packages à charger
   packages <- c("tidyverse", "geomtextpath", "magick","ggrepel")
   # Vérifier si les packages sont déjà installés
@@ -100,6 +105,8 @@ ined_courbe = function(
   
   #############################
   ### GESTION DES ERREURS    ----
+  
+
   
   
   
@@ -155,7 +162,7 @@ ined_courbe = function(
     mutate(varX = str_wrap(varX, ncarac_var_x))
   
   
-
+  
   # Variable X
   if(var_x_ordre == "base"){
     dt_plot = dt_plot |> 
@@ -185,7 +192,7 @@ ined_courbe = function(
   }
   
   
-
+  
   
   # Couleur
   if(is.null(var_couleur_pos) == FALSE) {
@@ -377,7 +384,7 @@ ined_courbe = function(
   
   # LEGENDE
   
-
+  
   if(is.numeric(legende_position) & length(legende_position) == 2){
     theme_legend_pos = legende_position
     
@@ -392,7 +399,7 @@ ined_courbe = function(
     )
   }
   
-
+  
   
   
   # LE THEME
@@ -425,12 +432,12 @@ ined_courbe = function(
                                 colour = "white",face = 2, 
                                 angle = 0, 
                                 #family = police
-                                ),
+    ),
     strip.background.x = element_rect(fill = color_text,colour = NA),
     strip.text.y = element_text(size = size_text_title, 
                                 colour = "white",face = 2, 
                                 #family = police
-                                ),
+    ),
     strip.background.y = element_rect(fill = color_text,colour = NA),
     strip.placement = "outside",
     
@@ -545,12 +552,13 @@ ined_courbe = function(
     
     p = dt_plot |> 
       ggplot(aes(x = varX, y = value, color = couleur, linetype = typeligne, label =  interaction(couleur, typeligne, sep = " x "), group = interaction(couleur, typeligne)))+
-      guides(color = guide_legend(ncol = legende_ncol_couleur, 
-                                  title.position = "top", 
-                                  title.hjust = 0.5),
-             linetype = guide_legend(ncol = legende_ncol_ligne, 
-                                     title.position = "top", 
-                                     title.hjust = 0.5))
+      guides(
+        color = guide_legend(ncol = legende_ncol_couleur, 
+                             title.position = "top", 
+                             title.hjust = 0.5),
+        linetype = guide_legend(ncol = legende_ncol_ligne, 
+                                title.position = "top", 
+                                title.hjust = 0.5))
     
   }
   
@@ -571,7 +579,7 @@ ined_courbe = function(
   
   
   
-
+  
   
   p = p +
     labs(title = str_wrap(titre,ncarac_titre),
@@ -669,7 +677,7 @@ ined_courbe = function(
                        "courbe + point",'courbe + points', "courbes + point", "courbes + points",
                        "courbe et point",'courbe et points', "courbes et point", "courbes et points"
                        
-                       )){
+  )){
     
     
     p = p + geom_point()
@@ -702,6 +710,7 @@ ined_courbe = function(
                       size = size_text/3,
                       fontface = 2,
                       position = position_dodge(width = 0.75),
+                      show.legend = FALSE
                       
       ) 
   }
@@ -736,7 +745,7 @@ ined_courbe = function(
     } 
   }
   
-
+  
   
   if(x_intervalle > 0 & is.numeric(dt_plot$varX)){
     p = p + scale_x_continuous(
@@ -745,7 +754,7 @@ ined_courbe = function(
   }
   
   
-  
+
   
   graph <<- p
   
@@ -783,7 +792,7 @@ ined_courbe = function(
            width = largeur,
            units = "cm")
     
-    message("Deux fichiers (svg + pdf) exportés ici : ", normalizePath(paste0(fichier)))
+    message("Deux fichiers (svg + pdf) exportés ")
     
     # Lecture avec magick
     img <- image_read_pdf(paste0(fichier,extension))

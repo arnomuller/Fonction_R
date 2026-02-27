@@ -62,6 +62,11 @@ ined_empile = function(
   options(OutDec= ",")
   
   ### GESTION LIBRARY           ----
+  
+  
+  ## Problèmes de marges avec une ancienne version de ggplot
+
+  
   # Liste des packages à charger
   packages <- c("tidyverse", "magick")
   # Vérifier si les packages sont déjà installés
@@ -73,6 +78,10 @@ ined_empile = function(
   }
   # Charger les packages
   lapply(packages, require, character.only = TRUE)
+  
+  
+
+  
   
   #############################
   
@@ -600,7 +609,7 @@ ined_empile = function(
            width = largeur,
            units = "cm")
     
-    message("Deux fichiers (svg + pdf) exportés ici : ", normalizePath(paste0(fichier)))
+    message("Deux fichiers (svg + pdf) exportés")
     
     # Lecture avec magick
     img <- image_read_pdf(paste0(fichier,extension))
