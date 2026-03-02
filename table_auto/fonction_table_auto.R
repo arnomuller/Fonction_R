@@ -14,17 +14,9 @@
 ## MESSAGES ----
 
 print("DERNIERES MÀJ : ")
-print("MAJ : 15/08/2025")
-print("Ajout des Intervalles de Confiance pour row et col")
-print("Correction bug eff_in_name = 'yes'")
-print("")
-print("MAJ : 05/08/2025")
-print("Ajout des graphiques :")
-print("Option view pour choisir de montrer des graphiques ou des tables (ex-view_html)")
-print("")
-print("MAJ : 24/07/2025")
-print("Ajout de vars_num :")
-print("Quelques indicateurs pour les variables numériques")
+print("MAJ : 02/03/2026")
+print("Correction colonne ENSEMBLE et exclude")
+
 
 
 ## FONCTION ----
@@ -201,6 +193,45 @@ table_auto <- function(data,                     # Un data.frame
         TRUE ~ paste0(as.factor(.)," : ",as_factor(.)))
       ))
   }
+  
+
+  
+  # Gestion des NA et exclusions dans les colonnes
+  if(is.null(var_col) == FALSE){
+    
+    # Gestion des NA
+    if(useNA == FALSE){
+      
+      dt_num = dt_num |> 
+        filter(!get(var_col) %in% c(""," ")) |> 
+        filter(is.na(get(var_col)) == FALSE )
+      dt = dt |> 
+        filter(!get(var_col) %in% c(""," ")) |> 
+        filter(is.na(get(var_col)) == FALSE )
+      
+    }
+    
+    # Exclure des modalités des calculs
+    if (is.null(exclude) == FALSE) {
+      
+      dt_num = dt_num |> 
+        filter(!get(var_col) %in% exclude)
+      dt = dt |>
+        filter(!get(var_col) %in% exclude)
+      
+      if(any(exclude == "Val.Manq.")){
+        dt_num = dt_num |> 
+          filter(is.na(get(var_col)) == FALSE )
+        dt = dt |> 
+          filter(is.na(get(var_col)) == FALSE )
+      } # Val.Manq.
+    } # Modalités
+  } # Exclusion des colonnes
+
+
+  
+  
+  
   #############################
   
   
@@ -220,7 +251,6 @@ table_auto <- function(data,                     # Un data.frame
                Groupe = factor(Groupe, levels = c(with(dt,names(table(get(var_col)))),"Val.Manq."))) 
       
     }
-    
     
     
     ###########
@@ -264,17 +294,6 @@ table_auto <- function(data,                     # Un data.frame
     
     if(is.null(var_col) == FALSE){
       
-      
-      # Gestion des NA
-      if(useNA == FALSE){
-        dt_num <- dt_num |> 
-          filter(Groupe != "Val.Manq." | is.na(Groupe) == FALSE )
-      }
-      # Exclure des modalités des calculs
-      if (is.null(exclude) == FALSE) {
-        dt_num <- dt_num |> 
-          filter(!Groupe %in% exclude)
-      }
       
       desc_bi_num = dt_num |>
         pivot_longer(all_of(vars_num),
@@ -331,7 +350,7 @@ table_auto <- function(data,                     # Un data.frame
   desc_bi_row <- data.frame()
   desc_bi_col <- data.frame()
   
-  #i = 3
+  #i = 1
   
   
   if(is.null(vars) == FALSE){
@@ -341,6 +360,7 @@ table_auto <- function(data,                     # Un data.frame
       
       ##################
       ### Création du tri à plat  ----
+      
       
       tabuni <- dt %>% 
         group_by(get(vars[i])) %>% 
@@ -776,7 +796,8 @@ Peut-être qu'un test de Fisher serait plus adapté")
   # UNIVAR         ----
   
   # Première ligne
-  first_row <- dt %>% mutate(ponderation = ponder_calc) %>% 
+  first_row <- dt %>% 
+    # mutate(ponderation = ponder_calc) %>% 
     summarise(ENSEMBLE = round(sum(ponderation),arrondi),
               ENSEMBLE_noPonder = n()) %>% 
     mutate(Freq = 100,
@@ -831,7 +852,8 @@ Peut-être qu'un test de Fisher serait plus adapté")
     ### EFF
     if(table_type %in% c("eff","all")){
       
-      first_row <- dt %>% mutate(ponderation = ponder_calc) %>% 
+      first_row <- dt %>% 
+        # mutate(ponderation = ponder_calc) %>% 
         group_by(get(var_col)) %>% 
         summarise(Eff = round(sum(ponderation),arrondi)) %>% 
         rename(Groupe = 1) %>% 
@@ -902,7 +924,8 @@ Peut-être qu'un test de Fisher serait plus adapté")
     ### ROW
     if(table_type %in% c("row","all")){
       
-      first_row <- dt %>% mutate(ponderation = ponder_calc) %>% 
+      first_row <- dt %>% 
+        # mutate(ponderation = ponder_calc) %>% 
         group_by(get(var_col)) %>% 
         summarise(Eff = sum(ponderation)) %>% 
         rename(Groupe = 1) %>% 
@@ -991,7 +1014,8 @@ Peut-être qu'un test de Fisher serait plus adapté")
     ### COL
     if(table_type %in% c("col","all")){
       
-      first_row <- dt %>% mutate(ponderation = ponder_calc) %>% 
+      first_row <- dt %>% 
+        # mutate(ponderation = ponder_calc) %>% 
         group_by(get(var_col)) %>% 
         summarise(Eff = 100) %>% 
         rename(Groupe = 1) %>% 
