@@ -49,7 +49,7 @@ ined_export = function(
          width = largeur,
          units = "cm")
   
-  ggsave(plot = p, 
+  ggsave(plot = graph, 
          filename = paste0(fichier,".svg"), 
          device = "svg",
          height = hauteur, 
