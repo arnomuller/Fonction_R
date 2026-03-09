@@ -65,7 +65,7 @@ ined_empile = function(
   
   
   ## Problèmes de marges avec une ancienne version de ggplot
-
+  
   
   # Liste des packages à charger
   packages <- c("tidyverse", "magick")
@@ -80,7 +80,7 @@ ined_empile = function(
   lapply(packages, require, character.only = TRUE)
   
   
-
+  
   
   
   #############################
@@ -173,8 +173,8 @@ ined_empile = function(
     
   }
   
-    
-    
+  
+  
   
   # Var Facettes
   if(is.null(var_facet_pos) == FALSE) {
@@ -470,7 +470,7 @@ ined_empile = function(
       geom_segment(aes(xend = varX, yend = 0),
                    linewidth = 1.2,
                    color = color_loli) +
-      geom_point(size = 5,
+      geom_point(size = 4,
                  color = color_loli)
     
     
@@ -569,6 +569,34 @@ ined_empile = function(
         breaks = scales::breaks_width(y_intervalle)) 
     } 
   }
+  
+  
+  # Correction lollipops
+  if(is.null(var_couleur_pos)){
+    p = p + guides(fill = "none")
+    
+    if(etiquette %in% c("yes","oui",TRUE, "max", "maxi")){
+      
+      if(barre_orient %in% c("vertical", "verticale", "verti")){
+        p = p +
+          geom_text(aes(label = etiquette),
+                    color = color_loli,
+                    size = size_text/3,
+                    fontface = 2,
+                    vjust = -1) 
+      } else {
+        
+        p = p +
+          geom_text(aes(label = etiquette),
+                    color = color_loli,
+                    size = size_text/3,
+                    fontface = 2,
+                    hjust = -1) 
+        
+      }
+    }
+  }
+  
   
   #######################################
   
