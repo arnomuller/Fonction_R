@@ -591,7 +591,7 @@ ined_empile = function(
                     color = color_loli,
                     size = size_text/3,
                     fontface = 2,
-                    hjust = -1) 
+                    hjust = -0.5) 
         
       }
     }
