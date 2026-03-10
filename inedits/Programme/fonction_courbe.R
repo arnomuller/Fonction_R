@@ -522,7 +522,7 @@ ined_courbe = function(
   if(is.null(var_couleur_pos) & is.null(var_ligne_pos)){
     p = dt_plot |> 
       mutate(couleur = "") |> 
-      ggplot(aes(x = varX, y = value, color = couleur)) +
+      ggplot(aes(x = varX, y = value, color = couleur, group = couleur)) +
       guides(color = "none")
     
   } else if (is.null(var_ligne_pos)) {
