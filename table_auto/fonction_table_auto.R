@@ -259,6 +259,7 @@ table_auto <- function(data,                     # Un data.frame
       pivot_longer(all_of(vars_num),
                    names_to = "Var",
                    values_to = "values") |> 
+      mutate(Var = factor(Var, levels = unique(Var))) |> 
       as_survey(ids = 1, weights = ponderation) |> 
       group_by(Var) |> 
       summarise(Minimum   = round(min(values, na.rm = T), arrondi),
@@ -299,6 +300,7 @@ table_auto <- function(data,                     # Un data.frame
         pivot_longer(all_of(vars_num),
                      names_to = "Var",
                      values_to = "values") |> 
+        mutate(Var = factor(Var, levels = unique(Var))) |> 
         as_survey(ids = 1, weights = ponderation) |> 
         group_by(Groupe,Var) |> 
         summarise(Minimum   = round(min(values, na.rm = T), arrondi),
