@@ -11,6 +11,9 @@ format:
     toc-title: Table des matières
     grid:
       margin-width: 350px
+knitr:
+  opts_chunk: 
+    warning: false
 reference-location: margin
 citation-location: margin
 self-contained: true
@@ -343,7 +346,7 @@ ined_baton(
     donnees = dt_barre,
     var_y = "Valeur",
     var_x = "Lieu",
-        var_couleur = "Modalites",
+    var_couleur = "Modalites",
     
     etiquette = "non",
     var_x_ordre = "base",
@@ -1119,12 +1122,14 @@ kable(dt_courbe) %>%
 ```{r}
 #| message: false
 ined_courbe(
-  donnee = dt_courbe,
+  donnees = dt_courbe,
   var_y = "Valeur",
   var_x = "Ages",
   var_x_ordre = "numerique",
   
   palette      = "orange",
+  
+  etiquette = "oui",
   
   y_pct = T,
   y_min = 0,
@@ -1132,7 +1137,7 @@ ined_courbe(
   y_intervalle = 20,
   x_intervalle = 1,
   
-  lisser_courbe = T,
+  lisser_courbe = TRUE,
   
   titre_x = "Âges au premier rapport sexuel",
   ncarac_titre_x = 15,
@@ -1358,7 +1363,7 @@ ined_export(graph = graph,
 
 
 
-# Astuce générales en R
+# Astuces générales en R
 
 
 ### Changer l'ordre des modalités
