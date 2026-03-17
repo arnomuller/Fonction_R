@@ -236,42 +236,18 @@ ined_baton = function(
   
   pal_genre        = c("#469164","#e3a852","#8ac2bd","#4f4f4f")
   pal_categorie    = c("#a993b9","#ea6058","#8DD3C7","#FDB462","#8C6642","#B3DE69","#80B1D3","#f5aba9","#5b4087")
-  pal_ordre_orange = c("#e8d0cf","#dbb1ad","#d49792","#ea6058","#ad312a","#7d241e","#450602") 
+  pal_ordre_orange = c("#e0b6b4","#eba8a4","#e88882","#ea6058","#ad312a","#7d241e","#450602") 
   pal_ordre_violet = c("#d2c3db","#c3b0d1","#a993b9","#775e8a","#57396e","#321647","#140321") 
   
   pal_oppose2       = c("#775e8a","#ea6058")
-  pal_oppose3       = c("#775e8a","#d1d1d1","#ea6058")
-  pal_oppose4       = c("#775e8a","#a993b9","#d49792","#ea6058")
-  pal_oppose5       = c("#775e8a","#a993b9","#d1d1d1","#d49792","#ea6058")
-  pal_oppose6       = c("#775e8a","#a993b9","#c3b0d1","#dbb1ad","#d49792","#ea6058")
-  pal_oppose7       = c("#775e8a","#a993b9","#c3b0d1","#d1d1d1","#dbb1ad","#d49792","#ea6058")
-  pal_oppose8       = c("#57396e","#775e8a","#a993b9","#c3b0d1","#dbb1ad","#d49792","#ea6058","#ad312a")
+  pal_oppose3       = c("#775e8a","#bfbfbf","#ea6058")
+  pal_oppose4       = c("#775e8a","#c3b0d1","#eba8a4","#ea6058")
+  pal_oppose5       = c("#775e8a","#c3b0d1","#bfbfbf","#eba8a4","#ea6058")
+  pal_oppose6       = c("#775e8a","#a993b9","#c3b0d1","#eba8a4","#e88882","#ea6058")
+  pal_oppose7       = c("#775e8a","#a993b9","#c3b0d1","#bfbfbf","#eba8a4","#e88882","#ea6058")
+  pal_oppose8       = c("#57396e","#775e8a","#a993b9","#c3b0d1","#eba8a4","#e88882","#ea6058","#ad312a")
   
-
-  # # Modalités avec couleurs spéciales
-  # asupr = "ne sait pas|999|888|ne souhaite pas répondre|nsp|nvpr|ne veut pas rép|non réponse|non-réponse|total|ensemble"
-  # 
-  # # Modalités classiques
-  # moda_couleur = names(table(dt_plot$couleur))
-  # moda_couleur_simple = moda_couleur[!str_detect(tolower(moda_couleur),asupr)]
-  # n_moda_vrai = length(moda_couleur_simple)
-  # 
-  # # Les NSP et non-réponses
-  # nsp = "ne sait pas|999|888|ne souhaite pas répondre|nsp|nvpr|ne veut pas rép|non réponse|non-réponse"
-  # moda_nsp = c()
-  # moda_nsp  = moda_couleur[str_detect(tolower(moda_couleur),nsp)]
-  # length(moda_nsp)
-  # 
-  # # Les totaux
-  # tot = "total|ensemble"
-  # moda_tot = c()
-  # moda_tot  = moda_couleur[str_detect(tolower(moda_couleur),tot)]
-  # 
-  # # Le vrai ordre des modalités
-  # moda_couleur_vf = c(moda_tot,moda_couleur_simple,moda_nsp)
-  
-  
-  
+    
   if( is.null(var_couleur_pos) == F) {
     n_moda = length(names(table(dt_plot$couleur)))
     fill_color = case_when(
@@ -279,10 +255,10 @@ ined_baton = function(
       palette %in% c("genre_inv","sexe","dem01") ~ rev(pal_genre[1:n_moda]),
       palette %in% c("categorie","cat")          ~ pal_categorie[1:n_moda],
       palette %in% c("categorie_inv","cat_inv")  ~ rev(pal_categorie[1:n_moda]),
-      palette == "orange"                        ~ pal_ordre_orange[1:n_moda],
-      palette == "orange_inv"                    ~ rev(pal_ordre_orange[1:n_moda]),
-      palette == "violet"                        ~ pal_ordre_violet[1:n_moda],
-      palette == "violet_inv"                    ~ rev(pal_ordre_violet[1:n_moda]),
+      palette == "orange"                        ~ pal_ordre_orange[ceiling(3.8-(nmoda/2)):floor(3.8+(nmoda/2))],
+      palette == "orange_inv"                    ~ rev(pal_ordre_orange[ceiling(3.8-(nmoda/2)):floor(3.8+(nmoda/2))]),
+      palette == "violet"                        ~ pal_ordre_violet[ceiling(3.8-(nmoda/2)):floor(3.8+(nmoda/2))],
+      palette == "violet_inv"                    ~ rev(pal_ordre_violet[ceiling(3.8-(nmoda/2)):floor(3.8+(nmoda/2))]),
       (palette == "oppose" & n_moda == 2)        ~ pal_oppose2[1:n_moda],
       (palette == "oppose" & n_moda == 3)        ~ pal_oppose3[1:n_moda],
       (palette == "oppose" & n_moda == 4)        ~ pal_oppose4[1:n_moda],
