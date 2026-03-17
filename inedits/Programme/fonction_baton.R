@@ -237,15 +237,15 @@ ined_baton = function(
   pal_genre        = c("#469164","#e3a852","#8ac2bd","#4f4f4f")
   pal_categorie    = c("#a993b9","#ea6058","#8DD3C7","#FDB462","#8C6642","#B3DE69","#80B1D3","#f5aba9","#5b4087")
   pal_ordre_orange = c("#e0b6b4","#eba8a4","#e88882","#ea6058","#ad312a","#7d241e","#450602") 
-  pal_ordre_violet = c("#d2c3db","#c3b0d1","#a993b9","#775e8a","#57396e","#321647","#140321") 
-  
+  pal_ordre_violet = c("#d2c3db","#bca9c9","#a993b9","#775e8a","#57396e","#321647","#140321") 
+
   pal_oppose2       = c("#775e8a","#ea6058")
   pal_oppose3       = c("#775e8a","#bfbfbf","#ea6058")
-  pal_oppose4       = c("#775e8a","#c3b0d1","#eba8a4","#ea6058")
-  pal_oppose5       = c("#775e8a","#c3b0d1","#bfbfbf","#eba8a4","#ea6058")
-  pal_oppose6       = c("#775e8a","#a993b9","#c3b0d1","#eba8a4","#e88882","#ea6058")
-  pal_oppose7       = c("#775e8a","#a993b9","#c3b0d1","#bfbfbf","#eba8a4","#e88882","#ea6058")
-  pal_oppose8       = c("#57396e","#775e8a","#a993b9","#c3b0d1","#eba8a4","#e88882","#ea6058","#ad312a")
+  pal_oppose4       = c("#775e8a","#bca9c9","#eba8a4","#ea6058")
+  pal_oppose5       = c("#775e8a","#bca9c9","#bfbfbf","#eba8a4","#ea6058")
+  pal_oppose6       = c("#775e8a","#a993b9","#d2c3db","#eba8a4","#e88882","#ea6058")
+  pal_oppose7       = c("#775e8a","#a993b9","#d2c3db","#bfbfbf","#eba8a4","#e88882","#ea6058")
+  pal_oppose8       = c("#57396e","#775e8a","#a993b9","#d2c3db","#eba8a4","#e88882","#ea6058","#ad312a")
   
     
   if( is.null(var_couleur_pos) == F) {
