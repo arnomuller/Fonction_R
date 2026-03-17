@@ -263,7 +263,7 @@ ined_empile = function(
       palette %in% c("categorie","cat")          ~ pal_categorie[1:n_moda],
       palette %in% c("categorie_inv","cat_inv")  ~ rev(pal_categorie[1:n_moda]),
       palette == "orange"                        ~ pal_ordre_orange[ceiling(3.8-(n_moda/2)):floor(3.8+(n_moda))],
-      palette == "orange_inv"                    ~ rev(pal_ordre_orange[ceiling(3.8-(n_moda/2)):floor(3.8+(nmoda/2))]),
+      palette == "orange_inv"                    ~ rev(pal_ordre_orange[ceiling(3.8-(n_moda/2)):floor(3.8+(n_moda/2))]),
       palette == "violet"                        ~ pal_ordre_violet[ceiling(3.8-(n_moda/2)):floor(3.8+(n_moda/2))],
       palette == "violet_inv"                    ~ rev(pal_ordre_violet[ceiling(3.8-(n_moda/2)):floor(3.8+(n_moda/2))]),
       (palette == "oppose" & n_moda == 2)        ~ pal_oppose2[1:n_moda],
