@@ -314,16 +314,16 @@ ined_courbe = function(
   
   pal_genre        = c("#469164","#e3a852","#8ac2bd","#4f4f4f")
   pal_categorie    = c("#a993b9","#ea6058","#8DD3C7","#FDB462","#8C6642","#B3DE69","#80B1D3","#f5aba9","#5b4087")
-  pal_ordre_orange = c("#faeceb","#e8c1be","#e6aaa5","#ea6058","#ad312a","#7d241e","#450602") 
-  pal_ordre_violet = c("#f6f0fa","#d2c1de","#a993b9","#775e8a","#57396e","#321647","#140321") 
+  pal_ordre_orange = c("#e8d0cf","#dbb1ad","#d49792","#ea6058","#ad312a","#7d241e","#450602") 
+  pal_ordre_violet = c("#d2c3db","#c3b0d1","#a993b9","#775e8a","#57396e","#321647","#140321") 
   
   pal_oppose2       = c("#775e8a","#ea6058")
-  pal_oppose3       = c("#775e8a","#e7e6e8","#ea6058")
-  pal_oppose4       = c("#775e8a","#a993b9","#e6aaa5","#ea6058")
-  pal_oppose5       = c("#775e8a","#a993b9","#e7e6e8","#e6aaa5","#ea6058")
-  pal_oppose6       = c("#775e8a","#a993b9","#d2c1de","#e8c1be","#e6aaa5","#ea6058")
-  pal_oppose7       = c("#775e8a","#a993b9","#d2c1de","#e7e6e8","#e8c1be","#e6aaa5","#ea6058")
-  pal_oppose8       = c("#57396e","#775e8a","#a993b9","#d2c1de","#e8c1be","#e6aaa5","#ea6058","#ad312a")
+  pal_oppose3       = c("#775e8a","#d1d1d1","#ea6058")
+  pal_oppose4       = c("#775e8a","#a993b9","#d49792","#ea6058")
+  pal_oppose5       = c("#775e8a","#a993b9","#d1d1d1","#d49792","#ea6058")
+  pal_oppose6       = c("#775e8a","#a993b9","#c3b0d1","#dbb1ad","#d49792","#ea6058")
+  pal_oppose7       = c("#775e8a","#a993b9","#c3b0d1","#d1d1d1","#dbb1ad","#d49792","#ea6058")
+  pal_oppose8       = c("#57396e","#775e8a","#a993b9","#c3b0d1","#dbb1ad","#d49792","#ea6058","#ad312a")
   
   if( is.null(var_couleur_pos) == F) {
     n_moda = length(names(table(dt_plot$couleur)))
