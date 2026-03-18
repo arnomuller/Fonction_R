@@ -527,7 +527,11 @@ ined_empile = function(
     }
   } else {
     
-    p = p + guides(fill = guide_legend(reverse = FALSE))
+    p = p + guides(fill = guide_legend(ncol = legende_ncol, 
+                                       reverse = FALSE,
+                                       byrow = legend_en_ligne,
+                                       title.position = "top", 
+                                       title.hjust = 0.5))
     
     if(is.null(y_max) == F){
       p = p + coord_cartesian(ylim = c(0,y_max))
