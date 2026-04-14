@@ -389,7 +389,7 @@ ined_empile = function(
   )
   
   
-  if(barre_orient == "vertical"){
+  if(barre_orient %in% c("vertical", "verticale", "verti")){
     
     xaxis_hjust = case_when(
       var_x_angle == 90 ~ 1,
